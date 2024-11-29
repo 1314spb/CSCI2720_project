@@ -1,0 +1,13 @@
+*.log
+
+node_modules/
+
+.dist/
+.DS_Store
+
+Logbook/
+literature/
+.venv/
+.env
+
+
