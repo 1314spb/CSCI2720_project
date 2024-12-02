@@ -15,8 +15,10 @@ This project is a full-stack application built with Express for the backend and 
 
 Before you begin, ensure you have the following installed:
 
-- [Node.js](https://nodejs.org/) (LTS version recommended)
+- [Node.js](https://nodejs.org/) (v18.17.0)
 - [npm](https://www.npmjs.com/) (Node package manager, comes with Node.js)
+
+You will also need to setup the MongoDB for database, you may also install MongoDB Compass.
 
 ## Project Structure
 ```
@@ -26,10 +28,9 @@ Before you begin, ensure you have the following installed:
 │ ├── /src          # Source files for React
 │ ├── index.html    # Main HTML file
 │ └── package.json  # React dependencies
-├── /server         # Express backend
-│ ├── app.js        # Express server
-│ └── package.json  # Express dependencies
-└── .env            # Environment variables (if needed)
+└── /server         # Express backend
+  ├── app.js        # Express server
+  └── package.json  # Express dependencies
 ```
 
 ## Installation
