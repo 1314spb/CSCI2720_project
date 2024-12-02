@@ -29,6 +29,10 @@ You will also need to setup the MongoDB for database, you may also install Mongo
 │ ├── index.html    # Main HTML file
 │ └── package.json  # React dependencies
 └── /server         # Express backend
+  ├── /config       # Database config or other configurations
+  ├── /middlewares  # Middlewares
+  ├── /utils        # Utilities
+  ├── app.js        # Express server
   ├── app.js        # Express server
   └── package.json  # Express dependencies
 ```
