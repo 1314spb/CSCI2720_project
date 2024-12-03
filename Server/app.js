@@ -15,6 +15,7 @@ const routes = require('./middlewares/auth');
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Parses URL-encoded reques
 // Serve static files from the React app in the 'dist' directory
 app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
 

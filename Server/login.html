@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration and Login</title>
+</head>
+<body>
+    <h1>Registration and Login Page</h1>
+
+    <!-- Registration Form -->
+    <div id="register-section">
+        <h2>Register</h2>
+        <form id="register-form">
+            <label for="reg-username">Username:</label>
+            <input type="username" id="reg-username" required><br><br>
+
+            <label for="reg-email">Email:</label>
+            <input type="email" id="reg-email" required><br><br>
+            
+            <label for="reg-password">Password:</label>
+            <input type="password" id="reg-password" required><br><br>
+            
+            <label for="reg-admin">Admin:</label>
+            <input type="checkbox" id="reg-admin"><br><br>
+
+            <button type="submit">Register</button>
+        </form>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-section">
+        <h2>Login</h2>
+        <form id="login-form">
+            <label for="login-email">Email:</label>
+            <input type="email" id="login-email" required><br><br>
+            
+            <label for="login-password">Password:</label>
+            <input type="password" id="login-password" required><br><br>
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <!-- User Info Section -->
+    <div id="user-info-section" style="display: none;">
+        <h2>User Information</h2>
+        <p id="user-info"></p>
+        <button id="logout-button">Logout</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const registerForm = document.getElementById("register-form");
+            const loginForm = document.getElementById("login-form");
+            const userInfoSection = document.getElementById("user-info-section");
+            const userInfoElement = document.getElementById("user-info");
+            const logoutButton = document.getElementById("logout-button");
+
+            // Function to get a cookie value by name
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            // Function to set a cookie
+            function setCookie(name, value, days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+            }
+
+            // Check if user is already logged in
+            const userEmail = getCookie("userEmail");
+            if (userEmail) {
+                userInfoElement.textContent = `Logged in as: ${userEmail}`;
+                userInfoSection.style.display = "block";
+                registerForm.style.display = "none";
+                loginForm.style.display = "none";
+            }
+
+            // Registration Form Submit Handler
+            registerForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const username = document.getElementById("reg-username").value;
+                const email = document.getElementById("reg-email").value;
+                const password = document.getElementById("reg-password").value;
+                const admin = document.getElementById("reg-admin").checked;
+
+                try {
+                    const response = await fetch("http://localhost:3000/user/register", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ username, email, password, admin }),
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        alert("Registration successful!");
+                    } else {
+                        alert(data.error || "Failed to register");
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("An error occurred during registration.");
+                }
+            });
+
+            // Login Form Submit Handler
+            loginForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const email = document.getElementById("login-email").value;
+                const password = document.getElementById("login-password").value;
+
+                try {
+                    const response = await fetch("http://localhost:3000/login", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ email, password }),
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        setCookie("userEmail", email, 1); // Cookie expires after 1 day
+                        userInfoElement.textContent = `Logged in as: ${email}`;
+                        userInfoSection.style.display = "block";
+                        registerForm.style.display = "none";
+                        loginForm.style.display = "none";
+                    } else {
+                        alert(data.error || "Login failed");
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("An error occurred during login.");
+                }
+            });
+
+            // Logout Button Handler
+            logoutButton.addEventListener("click", () => {
+                document.cookie = "userEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                userInfoSection.style.display = "none";
+                registerForm.style.display = "block";
+                loginForm.style.display = "block";
+            });
+        });
+    </script>
+</body>
+</html>
