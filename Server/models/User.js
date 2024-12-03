@@ -12,11 +12,11 @@ const UserSchema = mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        require: true,
     },
     admin: {
         type: Boolean,
-        required: true,
+        require: true
     },
 });
 
