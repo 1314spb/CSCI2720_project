@@ -11,11 +11,29 @@ const app = express();
 const PORT = 3000;
 const LOCATION_LIMIT = 10;
 
+const auth = require('./middlewares/auth');
+const admin = require('./middlewares/admin');
+const user = require('./middlewares/user');
+
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Parses URL-encoded reques
 // Serve static files from the React app in the 'dist' directory
 app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
 
+app.use((req, res, next) => {
+    // res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    );
+    next();
+  });
+  
 db.on('error', console.error.bind(console, 'Connection error:'));
 
 db.once('open', () => {
@@ -93,6 +111,7 @@ db.once('open', () => {
                         })
                         .catch((err) => {
                             console.log('Failed to create a new event');
+                            console.log(err);
                         });
                     })
                 })
@@ -109,14 +128,55 @@ db.once('open', () => {
     })
     .catch((err) => {
         console.log('Failed to read from Location');
+        console.log(err);
+    })
+
+    // Initialize admin account
+    User.find({admin: true})
+    .then((user) => {
+       if (user.length === 0) {
+        const newAdmin = new User({
+            username: 'admin',
+            email: 'admin@email.com',
+            password: 'admin123',
+            admin: true
+        })
+        newAdmin.save()
+        .then((data) => {
+            console.log('Admin account created successfully');
+            console.log(data);
+        })
+        .catch((err) => {
+            console.log('Failed to create Admin User');
+            console.log(err);
+        })
+       }
+    })
+    .catch((err) => {
+        console.log('Failed to read from User');
+        console.log(err);
+    })
+
+    app.use('/api/auth', auth);
+    app.use('/api/admin', admin);
+    app.use('/api/user', user);
+
+    app.post('/test', (req, res) => {
+        try{
+            console.log("post request got!");
+            res.status(200).send('Hell0');
+        }catch(error){
+            res.status(404).send(error);
+        }
     })
 
     // Not Found
-    app.get('/*', (req, res) => {
-        res.status(404).send('Page not found');
-    })
+    // app.get('/*', (req, res) => {
+    //     res.status(404).send('Page not found');
+    // })
 
 })
+
 
 const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

@@ -31,4 +31,19 @@ const EventSchema = mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('Event', EventSchema);
+EventSchema.pre('save', async function (next) {
+    if (!this.userId) {
+        try {
+            // Find the event with the highest userId
+            const lastEvent = await mongoose.model('Event').findOne().sort({ userId: -1 });
+            // Set the new userId as the highest userId + 1, or start with 1 if none exists
+            this.eventId = lastEvent ? lastEvent.eventId + 1 : 1;
+        } catch (error) {
+            return next(error);
+        }
+    }
+    next();
+});
+
+const Event = mongoose.model('Event', EventSchema);
+module.exports = Event;
