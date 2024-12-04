@@ -7,7 +7,8 @@ const UserSchema = mongoose.Schema({
     },
     username: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     email: {
         type: String,
@@ -20,8 +21,12 @@ const UserSchema = mongoose.Schema({
     },
     admin: {
         type: Boolean,
-        required: true
+        default: false
     },
+    favLoc: {
+        type: [Number],
+        default: []
+    }
 });
 
 UserSchema.pre('save', async function (next) {
@@ -37,5 +42,6 @@ UserSchema.pre('save', async function (next) {
     }
     next();
 });
+
 const User = mongoose.model('User', UserSchema);
 module.exports = User;

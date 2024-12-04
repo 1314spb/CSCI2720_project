@@ -111,6 +111,7 @@ db.once('open', () => {
                         })
                         .catch((err) => {
                             console.log('Failed to create a new event');
+                            console.log(err);
                         });
                     })
                 })
@@ -127,6 +128,7 @@ db.once('open', () => {
     })
     .catch((err) => {
         console.log('Failed to read from Location');
+        console.log(err);
     })
 
     // Initialize admin account
@@ -146,11 +148,13 @@ db.once('open', () => {
         })
         .catch((err) => {
             console.log('Failed to create Admin User');
+            console.log(err);
         })
        }
     })
     .catch((err) => {
         console.log('Failed to read from User');
+        console.log(err);
     })
 
     app.use('/api/auth', auth);
