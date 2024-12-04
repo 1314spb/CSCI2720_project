@@ -129,6 +129,30 @@ db.once('open', () => {
         console.log('Failed to read from Location');
     })
 
+    // Initialize admin account
+    User.find({admin: true})
+    .then((user) => {
+       if (user.length === 0) {
+        const newAdmin = new User({
+            username: 'admin',
+            email: 'admin@email.com',
+            password: 'admin123',
+            admin: true
+        })
+        newAdmin.save()
+        .then((data) => {
+            console.log('Admin account created successfully');
+            console.log(data);
+        })
+        .catch((err) => {
+            console.log('Failed to create Admin User');
+        })
+       }
+    })
+    .catch((err) => {
+        console.log('Failed to read from User');
+    })
+
     app.use('/api/auth', auth);
     app.use('/api/admin', admin);
     app.use('/api/user', user);
