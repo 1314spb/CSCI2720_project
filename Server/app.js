@@ -12,6 +12,8 @@ const PORT = 3000;
 const LOCATION_LIMIT = 10;
 
 const auth = require('./middlewares/auth');
+const admin = require('./middlewares/admin');
+const user = require('./middlewares/user');
 
 app.use(cors());
 app.use(express.json());
@@ -127,7 +129,9 @@ db.once('open', () => {
         console.log('Failed to read from Location');
     })
 
-    app.use('/user', auth);
+    app.use('/api/auth', auth);
+    app.use('/api/admin', admin);
+    app.use('/api/user', user);
 
     app.post('/test', (req, res) => {
         try{
