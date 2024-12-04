@@ -5,6 +5,7 @@ import './App.css'
 import NavBar from './components/NavBar';
 
 import Home from './components/Home/Home';
+import Map from './components/Map/Map';
 
 function App() {
 
@@ -15,9 +16,9 @@ function App() {
         <main className="flex flex-col items-center justify-center h-screen w-full">
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/contact" element={<Contact />} /> */}
+            <Route path="/map" element={<Map />} />
+            {/* <Route path="/services" element={<Services />} /> */}
+            {/* <Route path="/contact" element={<Contact />} /> */}
           </Routes>
         </main>
       </div>
