@@ -11,7 +11,7 @@ const app = express();
 const PORT = 3000;
 const LOCATION_LIMIT = 10;
 
-const routes = require('./middlewares/auth');
+const auth = require('./middlewares/auth');
 
 app.use(cors());
 app.use(express.json());
@@ -127,21 +127,22 @@ db.once('open', () => {
         console.log('Failed to read from Location');
     })
 
+    app.use('/user', auth);
+
+    app.post('/test', (req, res) => {
+        try{
+            console.log("post request got!");
+            res.status(200).send('Hell0');
+        }catch(error){
+            res.status(404).send(error);
+        }
+    })
+
     // Not Found
     // app.get('/*', (req, res) => {
     //     res.status(404).send('Page not found');
     // })
 
-})
-
-app.use('/user', routes);
-app.post('/test', (req, res) => {
-    try{
-        console.log("post request got!");
-        res.status(200).send('Hell0');
-    }catch(error){
-        res.status(404).send(error);
-    }
 })
 
 
