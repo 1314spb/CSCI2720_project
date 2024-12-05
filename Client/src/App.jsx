@@ -13,7 +13,7 @@ function App() {
   return (
     <Router>
       <div className='w-full'>
-        <NavBar />
+        {location.pathname !== '/login' && <NavBar />}
         <main className="flex flex-col items-center justify-center h-screen w-full">
           <Routes>
             <Route path="/" element={<Home />} />

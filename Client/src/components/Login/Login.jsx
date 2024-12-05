@@ -1,7 +1,7 @@
 import React from "react";
 import { TEInput, TERipple } from "tw-elements-react";
 
-export default function Login() {
+const Login = () => {
     return (
         <section class="bg-gray-50 dark:bg-gray-900 w-full">
             <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -41,3 +41,5 @@ export default function Login() {
         </section>
     );
 }
+
+export default Login;
