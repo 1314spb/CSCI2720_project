@@ -84,7 +84,7 @@ const Map = () => {
         mapInstance.addControl(new mapboxgl.NavigationControl());
 
         // 添加用戶標記
-        const newMarker = new mapboxgl.Marker({ color: 'red' })
+        const newMarker = new mapboxgl.Marker({ color: 'blue' })
             .setLngLat([userLocation.lng, userLocation.lat])
             .addTo(mapInstance);
         setUserMarker(newMarker);
@@ -122,7 +122,7 @@ const Map = () => {
         if (!map) return;
 
         venues.forEach((venue) => {
-            const marker = new mapboxgl.Marker({ color: 'blue' })
+            const marker = new mapboxgl.Marker({ color: 'red' })
                 .setLngLat([venue.longitude, venue.latitude])
                 .addTo(map);
 
