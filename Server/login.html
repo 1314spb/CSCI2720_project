@@ -34,7 +34,10 @@
         <form id="login-form">
             <label for="login-email">Email:</label>
             <input type="email" id="login-email" required><br><br>
-            
+
+            <!-- <label for="login-username">Username:</label>
+            <input type="username" id="login-username" required><br><br> -->
+
             <label for="login-password">Password:</label>
             <input type="password" id="login-password" required><br><br>
 
@@ -112,11 +115,13 @@
             // Login Form Submit Handler
             loginForm.addEventListener("submit", async (e) => {
                 e.preventDefault();
+                // const username = document.getElementById("login-username").value;
                 const email = document.getElementById("login-email").value;
                 const password = document.getElementById("login-password").value;
+                console.log(`password is ${password}`);
 
                 try {
-                    const response = await fetch("http://localhost:3000/login", {
+                    const response = await fetch("http://localhost:3000/user/login", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -125,9 +130,13 @@
                     });
 
                     const data = await response.json();
+                    console.log(data);
                     if (response.ok) {
-                        setCookie("userEmail", email, 1); // Cookie expires after 1 day
-                        userInfoElement.textContent = `Logged in as: ${email}`;
+                        setCookie("userId", data.userData.userId, 1);// Cookie expires after 1 day
+                        setCookie("username", data.userData.username, 1);
+                        setCookie("email", data.userData.email, 1);
+                        setCookie("admin", data.userData.admin, 1);
+                        userInfoElement.textContent = `Logged in as: ${data.userData.username}`;
                         userInfoSection.style.display = "block";
                         registerForm.style.display = "none";
                         loginForm.style.display = "none";
@@ -142,7 +151,10 @@
 
             // Logout Button Handler
             logoutButton.addEventListener("click", () => {
-                document.cookie = "userEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                deleteCookie("userId");
+                deleteCookie("username");
+                deleteCookie("email");
+                deleteCookie("admin");
                 userInfoSection.style.display = "none";
                 registerForm.style.display = "block";
                 loginForm.style.display = "block";

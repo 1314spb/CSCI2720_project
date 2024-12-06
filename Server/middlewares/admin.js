@@ -26,7 +26,7 @@ router.post('/createuser', (req, res) => {
             message: 'success'
         })
     })
-    .catcH((err) => {
+    .catch((err) => {
         console.log('Failed to create new user');
         console.log(err);
         res.status(500).json({
@@ -58,7 +58,7 @@ router.put('/modifyuser/:username', (req, res) => {
             message: 'success'
         })
     })
-    .catcH((err) => {
+    .catch((err) => {
         console.log('User modification failed')
         console.log(err);
         res.status(400).json({
@@ -92,7 +92,7 @@ router.post('/createevent', (req, res) => {
             message: 'success'
         })
     })
-    .catcH((err) => {
+    .catch((err) => {
         console.log('Failed to create new event');
         console.log(err);
         res.status(500).json({
@@ -130,7 +130,7 @@ router.put('/modifyevent/:eventId', (req, res) => {
             message: 'success'
         })
     })
-    .catcH((err) => {
+    .catch((err) => {
         console.log('Event modification failed')
         console.log(err);
         res.status(400).json({

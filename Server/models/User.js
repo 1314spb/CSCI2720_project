@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const UserSchema = mongoose.Schema({
+const UserSchema = new Schema({
     userId: {
         type: Number,
         unique: true
     },
     username: {
         type: String,
-        required: true,
-        unique: true
+        unique: true,
+        required: true
     },
     email: {
         type: String,
@@ -23,10 +24,11 @@ const UserSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    favLoc: {
-        type: [Number],
+    favLoc: [{
+        type: Number,
+        ref: 'Location',
         default: []
-    }
+    }]
 });
 
 UserSchema.pre('save', async function (next) {

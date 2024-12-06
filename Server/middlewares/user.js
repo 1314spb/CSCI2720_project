@@ -61,3 +61,63 @@ router.put('/addfavlocation/:userId/:locId', (req, res) => {
         })
     })
 })
+
+router.put('/addFavLoc/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const { favoriteLocationIds } = req.body; 
+        console.log(favoriteLocationIds);
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $addToSet: { favLoc: favoriteLocationIds} },
+            { new: true }
+        )
+        if(!updatedUser){
+            return res.status(404).json({message: "User not found"});
+        }
+        console.log(`updatedUser.favLoc is ${updatedUser.favLoc}`);
+        const favoriteLocations = await Location.find({ locId: {$in: updatedUser.favLoc}});
+        res.status(200).json({
+            message: 'Favorite locations updated successfully',
+            userData: {
+                userId: updatedUser._id,
+                email: updatedUser.email,
+                admin: updatedUser.admin,
+                favLoc: favoriteLocations,
+            },
+        });
+    } catch (error) {
+        console.log("Got error while updating favorites");
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.put('/removeFavLoc/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const { favoriteLocationIds } = req.body; 
+        // console.log(favoriteLocationIds);
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $pull: { favLoc: {$in: favoriteLocationIds} } },
+            { new: true }
+        )
+        if(!updatedUser){
+            return res.status(404).json({message: "User not found"});
+        }
+        console.log(`updated favLoc is ${updatedUser.favLoc}`);
+        const favoriteLocations = await Location.find({ locId: {$in: updatedUser.favLoc}});
+        res.status(200).json({
+            message: 'Favorite locations removed successfully',
+            userData: {
+                userId: updatedUser._id,
+                email: updatedUser.email,
+                admin: updatedUser.admin,
+                favLoc: favoriteLocations,
+            },
+        });
+    } catch (error) {
+        console.log("Got error while removing favorite location");
+        res.status(500).json({ message: error.message });
+    }
+});
