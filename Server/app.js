@@ -11,7 +11,9 @@ const app = express();
 const PORT = 3000;
 const LOCATION_LIMIT = 10;
 
-const routes = require('./middlewares/auth');
+const auth = require('./middlewares/auth');
+const admin = require('./middlewares/admin');
+const user = require('./middlewares/user');
 
 app.use(cors());
 app.use(express.json());
@@ -109,6 +111,7 @@ db.once('open', () => {
                         })
                         .catch((err) => {
                             console.log('Failed to create a new event');
+                            console.log(err);
                         });
                     })
                 })
@@ -125,6 +128,46 @@ db.once('open', () => {
     })
     .catch((err) => {
         console.log('Failed to read from Location');
+        console.log(err);
+    })
+
+    // Initialize admin account
+    User.find({admin: true})
+    .then((user) => {
+       if (user.length === 0) {
+        const newAdmin = new User({
+            username: 'admin',
+            email: 'admin@email.com',
+            password: 'admin123',
+            admin: true
+        })
+        newAdmin.save()
+        .then((data) => {
+            console.log('Admin account created successfully');
+            console.log(data);
+        })
+        .catch((err) => {
+            console.log('Failed to create Admin User');
+            console.log(err);
+        })
+       }
+    })
+    .catch((err) => {
+        console.log('Failed to read from User');
+        console.log(err);
+    })
+
+    app.use('/api/auth', auth);
+    app.use('/api/admin', admin);
+    app.use('/api/user', user);
+
+    app.post('/test', (req, res) => {
+        try{
+            console.log("post request got!");
+            res.status(200).send('Hell0');
+        }catch(error){
+            res.status(404).send(error);
+        }
     })
 
     // Not Found
@@ -132,16 +175,6 @@ db.once('open', () => {
     //     res.status(404).send('Page not found');
     // })
 
-})
-
-app.use('/user', routes);
-app.post('/test', (req, res) => {
-    try{
-        console.log("post request got!");
-        res.status(200).send('Hell0');
-    }catch(error){
-        res.status(404).send(error);
-    }
 })
 
 
