@@ -3,7 +3,7 @@ const router = express.Router();
 module.exports = router;
 const mongoose = require('mongoose');
 const User = require('../models/User');
-
+const Location = require('../models/Location');
 
 router.post('/register', async (req, res) => {
     console.log("Request recieved!");
@@ -19,7 +19,8 @@ router.post('/register', async (req, res) => {
                 username: req.body.username,
                 email: req.body.email,
                 password: req.body.password,
-                admin: req.body.admin
+                admin: req.body.admin,
+                favLoc: []
             });
             // console.log(newUser.username);
             // await newUser.save();
@@ -37,23 +38,29 @@ router.post('/register', async (req, res) => {
 router.post('/login', async(req, res) => {
     console.log("Login request recieved");
     try{
-        const user = await mongoose.model('User').findOne({ email: req.body.email });
+        // const user = await mongoose.model('User').findOne({ email: req.body.email });
+        const user = await mongoose.model('User').findOne({ username: req.body.username });
         if (!user) {
-            // return res.status(401).json({ message: 'Invalid username' });
-            return res.status(401).json({ message: 'Invalid email' });
+            console.log("Invalid username");
+            return res.status(401).json({ message: 'Invalid username' });
+            // return res.status(401).json({ message: 'Invalid email' });
         }
 
         if(user.password !== req.body.password) {
+            console.log("Wrong password");
             return res.status(401).json({ message: 'Wrong password' });
         }
 
+        // const favLocInfo = await Location.find({ locId: { $in: user.favLoc } });
+        // console.log(favLocInfo);
         res.status(200).json({
             message: "Login Successfully",
             userData: {
                 userId: user.userId,
                 username: user.username,
                 email: user.email,
-                admin: user.admin
+                admin: user.admin,
+                favLoc: user.favLoc
             }
         });
     }catch(error){

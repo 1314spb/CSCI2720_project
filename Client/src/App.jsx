@@ -1,22 +1,26 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './Login';
+import { useLocation } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import ProtectedRoute from './ProtectedRoute';
 import { useState } from 'react'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css'
 
-import NavBar from './components/NavBar';
-
+import NavBar from './components/NavBar/NavBar';
 import Home from './components/Home/Home';
 import Map from './components/Map/Map';
 import Login from './components/Login/Login';
 
 function App() {
-
   return (
     <Router>
+      <Main />
+    </Router>
+  )
+  }
+function Main() {
+  const location = useLocation();
+  return ( 
       <div className='w-full'>
         {location.pathname !== '/login' && <NavBar />}
         <main className="flex flex-col items-center justify-center h-screen w-full">
@@ -29,7 +33,6 @@ function App() {
           </Routes>
         </main>
       </div>
-    </Router>
   );
 }
 
