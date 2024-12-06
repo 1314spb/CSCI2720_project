@@ -11,6 +11,8 @@ import Map from './components/Map/Map';
 import Login from './components/Login/Login';
 import Dashboard from './components/Dashboard/Dashboard';
 import UsersManager from './components/UsersManager/UsersManager';
+import Favourite from './components/Favourite/Favourite';
+
 
 function App() {
 
@@ -24,11 +26,11 @@ function App() {
             <Route path="/list_of_location" element={<List_of_Location />} />
             <Route path="/list_of_events" element={<List_of_Events />} />
             <Route path="/map" element={<Map />} />
+            <Route path="/favourite" element={<Favourite />} />
+            
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/usersmanager" element={<UsersManager />} />
-            {/* <Route path="/services" element={<Services />} /> */}
-            {/* <Route path="/contact" element={<Contact />} /> */}
           </Routes>
         </main>
       </div>
