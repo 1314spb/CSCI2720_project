@@ -75,7 +75,7 @@ const SortableTable = () => {
     const fetchVenues = async () => {
       try {
         const response = await axios.get('http://localhost:5173/venues.xml', {
-          responseType: 'text', // 确保响应类型为文本
+          responseType: 'text',
         });
 
         const parser = new DOMParser();
