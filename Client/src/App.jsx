@@ -5,7 +5,6 @@ import './App.css';
 import NavBar from './components/NavBar';
 
 import Home from './components/Home/Home';
-import Map from './components/Map/Map';
 import List_of_Location from './components/List_of_Location/List_of_Location';
 import List_of_Events from './components/List_of_Events/List_of_Events';
 
