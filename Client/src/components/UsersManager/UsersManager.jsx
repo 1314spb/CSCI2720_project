@@ -68,6 +68,11 @@ const UsersManager = () => {
     }
   };
 
+  const handleModalClick = (e) => {
+    // Prevent closing the modal when clicking inside of it
+    e.stopPropagation();
+  };
+
   return (
     <div className="overflow-x-auto h-full w-full p-4">
       <table className="min-w-full divide-y divide-gray-200">
@@ -174,13 +179,13 @@ const UsersManager = () => {
                 No users available.
               </td>
             </tr>
-          )}
+          )} 
         </tbody>
       </table>
 
       {/* Edit Modal */}
       {isModalOpen && selectedUser && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
+        <div className="fixed z-10 inset-0 overflow-y-auto" onClick={handleCloseModal}>
           <div
             className="flex items-center justify-center min-h-screen px-4"
             aria-labelledby="modal-title"
@@ -189,7 +194,7 @@ const UsersManager = () => {
           >
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
-            <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full relative mt-6">
+            <div className="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full relative mt-6" onClick={handleModalClick}>
               {/* Modal Header */}
               <div className="flex items-start justify-between p-5 border-b rounded-t">
                 <h3 className="text-xl font-semibold" id="modal-title">
