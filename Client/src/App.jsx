@@ -9,9 +9,11 @@ import List_of_Location from './components/List_of_Location/List_of_Location';
 import List_of_Events from './components/List_of_Events/List_of_Events';
 import Map from './components/Map/Map';
 import Login from './components/Login/Login';
+import SignUp from './components/Signup/SignUp';
 import UsersManager from './components/UsersManager/UsersManager';
 import EventsManager from './components/EventsManager/EventsManager';
 import Favourite from './components/Favourite/Favourite';
+
 
 function App() {
   return (
@@ -33,8 +35,8 @@ function Main() {
           <Route path="/map" element={<Map />} />
           <Route path="/favourite" element={<Favourite />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/usersmanager" element={<UsersManager />} />
-          
           <Route path="/eventsmanager" element={<EventsManager />} />
         </Routes>
       </main>
