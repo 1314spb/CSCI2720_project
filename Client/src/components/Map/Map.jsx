@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { useLocation } from 'react-router-dom';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibGVvc2luY2h1bmdobyIsImEiOiJjbTQ5aHpsOXUwYXpoMm1xNDNjaHo0dmhuIn0.vLLeV55pFPR44rZedmbLgw';
 
 const Map = () => {
+    const location = useLocation();
     const [venues, setVenues] = useState([]);
     const [userLocation, setUserLocation] = useState({ lng: 114.206, lat: 22.42 });
     const [map, setMap] = useState(null);
@@ -71,10 +73,14 @@ const Map = () => {
 
     // 初始化地圖
     useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const lat = parseFloat(queryParams.get('lat'));
+        const lng = parseFloat(queryParams.get('lng'));
+        const center = lat && lng ? [lng, lat] : [userLocation.lng, userLocation.lat];
         const mapInstance = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/leosinchungho/cm49k8zz801ck01si70os84ez',
-            center: [userLocation.lng, userLocation.lat],
+            center: center,
             zoom: 13
         });
 
@@ -115,7 +121,7 @@ const Map = () => {
             if (userMarker) userMarker.remove();
             mapInstance.remove();
         };
-    }, [userLocation.lng, userLocation.lat]);
+    }, [userLocation.lng, userLocation.lat, location.search]);
 
     // 添加地點標記並設置點擊事件
     useEffect(() => {
@@ -130,10 +136,12 @@ const Map = () => {
             marker.getElement().addEventListener('click', () => {
                 setSelectedVenue(venue);
                 // 將地圖中心移動到選中地點並放大
-                map.flyTo({ center: [venue.longitude, venue.latitude], zoom: 14 });
+                if (venue.latitude !== userLocation.lat || venue.longitude !== userLocation.lng) {
+                    map.flyTo({ center: [venue.longitude, venue.latitude], zoom: 14 });
+                }
             });
         });
-    }, [map, venues]);
+    }, [map, venues , userLocation]);
 
     // 處理添加評論
     const handleAddComment = (venueId, comment) => {
