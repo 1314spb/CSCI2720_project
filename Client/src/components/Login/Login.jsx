@@ -1,5 +1,4 @@
 import React, {useState} from "react";
-import { TEInput, TERipple } from "tw-elements-react";
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 const Login = () => {

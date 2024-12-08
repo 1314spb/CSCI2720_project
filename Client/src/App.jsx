@@ -26,7 +26,7 @@ function Main() {
   const location = useLocation();
   return (
     <div className='w-full'>
-      {location.pathname !== '/login' && <NavBar />}
+      {location.pathname !== '/login' && location.pathname !== '/signup' && <NavBar />}
       <main className="flex flex-col items-center justify-center h-screen w-full">
         <Routes>
           <Route path="/" element={<Home />} />
