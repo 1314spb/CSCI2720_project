@@ -81,10 +81,9 @@ const UsersManager = () => {
           <tr>
             {[
               'Name',
-              'Title',
+              'Password',
               'Status',
               'Role',
-              'Email',
               'Actions',
             ].map((header) => (
               <th
@@ -146,11 +145,6 @@ const UsersManager = () => {
                 {user.role}
               </td>
 
-              {/* Email */}
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-left">
-                {user.email}
-              </td>
-
               {/* Actions */}
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex">
                 <button
@@ -179,7 +173,7 @@ const UsersManager = () => {
                 No users available.
               </td>
             </tr>
-          )} 
+          )}
         </tbody>
       </table>
 
@@ -266,19 +260,19 @@ const UsersManager = () => {
                         id="email"
                         value={selectedUser.email}
                         onChange={handleInputChange}
-                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
+                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-400 sm:text-sm 
                                    rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                        required
+                        readOnly
                       />
                     </div>
 
-                    {/* Title */}
+                    {/* Password */}
                     <div className="col-span-6 sm:col-span-3">
                       <label
                         htmlFor="title"
                         className="text-sm font-medium text-gray-900 block mb-2"
                       >
-                        Title
+                        Password
                       </label>
                       <input
                         type="text"
@@ -292,25 +286,6 @@ const UsersManager = () => {
                       />
                     </div>
 
-                    {/* Department */}
-                    <div className="col-span-6 sm:col-span-3">
-                      <label
-                        htmlFor="department"
-                        className="text-sm font-medium text-gray-900 block mb-2"
-                      >
-                        Department
-                      </label>
-                      <input
-                        type="text"
-                        name="department"
-                        id="department"
-                        value={selectedUser.department}
-                        onChange={handleInputChange}
-                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
-                                   rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                        required
-                      />
-                    </div>
 
                     {/* Role */}
                     <div className="col-span-6 sm:col-span-3">
@@ -356,31 +331,10 @@ const UsersManager = () => {
                         <option value="Inactive">Inactive</option>
                       </select>
                     </div>
-
-                    {/* Avatar URL */}
-                    <div className="col-span-6 sm:col-span-6">
-                      <label
-                        htmlFor="avatar"
-                        className="text-sm font-medium text-gray-900 block mb-2"
-                      >
-                        Avatar URL
-                      </label>
-                      <input
-                        type="url"
-                        name="avatar"
-                        id="avatar"
-                        value={selectedUser.avatar}
-                        onChange={handleInputChange}
-                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
-                                   rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                        placeholder="https://i.pravatar.cc/150?img=3"
-                        required
-                      />
-                    </div>
                   </div>
 
                   {/* Submit Button */}
-                  <div className="p-6 border-t border-gray-200 rounded-b">
+                  <div className="p-6 rounded-b">
                     <button
                       type="submit"
                       className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 

@@ -13,7 +13,7 @@ import SignUp from './components/Signup/SignUp';
 import UsersManager from './components/UsersManager/UsersManager';
 import EventsManager from './components/EventsManager/EventsManager';
 import Favourite from './components/Favourite/Favourite';
-
+import Profile from './components/Profile/Profile';
 
 function App() {
   return (
@@ -38,6 +38,8 @@ function Main() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/usersmanager" element={<UsersManager />} />
           <Route path="/eventsmanager" element={<EventsManager />} />
+
+          <Route path='/profile' element={<Profile />} />
         </Routes>
       </main>
     </div>
