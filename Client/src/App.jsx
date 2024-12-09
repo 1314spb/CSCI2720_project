@@ -14,6 +14,7 @@ import Login from './components/Login/Login';
 import Dashboard from './components/Dashboard/Dashboard';
 import UsersManager from './components/UsersManager/UsersManager';
 import Favourite from './components/Favourite/Favourite';
+import No_Idea from './components/No_Idea/No_Idea';
 
 
 function App() {
@@ -35,6 +36,7 @@ function Main() {
             <Route path="/list_of_events" element={<List_of_Events />} />
             <Route path="/map" element={<Map />} />
             <Route path="/favourite" element={<Favourite />} />
+            <Route path="/no_idea" element={<No_Idea />} />
             
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />

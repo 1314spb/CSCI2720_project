@@ -184,65 +184,65 @@ const ListOfLocation = () => {
     };
 
   return (
-    <div className="min-h-screen h-full flex items-center">
-      <div className="w-full max-w-5xl px-2">
-        <div className="flex space-x-5 mb-4">
+<div className="min-h-screen h-full flex items-center bg-gray-100">
+  <div className="w-full max-w-5xl px-2">
+    <div className="flex space-x-5 mb-4">
+        <input
+            type="text"
+            placeholder="Search by location..."
+            value={search}
+            onChange={handleSearch}
+            className="border border-gray-400 rounded-md p-2 w-60 text-gray-800"  // Dark text
+        />
+        <select 
+            value={selectedArea} 
+            onChange={handleAreaChange} 
+            className="border border-gray-400 rounded-md p-2 w-60 text-gray-800"
+        >
+        <option value="default">Area</option>
+        {Area.map(area => (
+          <option key={area} value={area}>{area}</option>
+        ))}
+        </select>
+        <div className="border border-gray-400 rounded-md p-2 w-60 bg-white">
+            <label className='flex text-gray-800'>Distance (km)</label>
             <input
-                type="text"
-                placeholder="Search by location..."
-                value={search}
-                onChange={handleSearch}
-                className="border border-gray-300 rounded-md p-2 w-60"
+            type="range"
+            min="0"
+            max="50"
+            step="1"
+            value={maxDistance}
+            onChange={handleDistanceChange}
+            className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-neutral-400"
             />
-            <select 
-                value={selectedArea} 
-                onChange={handleAreaChange} 
-                className="border border-gray-300 rounded-md p-2 w-60 text-gray-400"
-            >
-            <option value="default">Area</option>
-            {Area.map(area => (
-              <option key={area} value={area}>{area}</option>
-            ))}
-            </select>
-            <div className="border border-gray-300 rounded-md p-2 w-60 text-gray-400 bg-black">
-                <label className='flex'>Distance (km)</label>
-                <input
-                type="range"
-                min="0"
-                max="50"
-                step="1"
-                value={maxDistance}
-                onChange={handleDistanceChange}
-                className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-neutral-400"
-                />
-            </div>
         </div>
-        <Card className="h-full w-full">
-            <CardBody className="overflow-scroll px-0">
-                <table className="mt-4 w-full min-w-max table-auto text-left">
-                    <thead>
-                        <tr>
-                            <th className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">
-                                <Button onClick={() => handleSort('id')} className="flex items-center gap-2">
-                                ID 
-                                <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                                </Button>
-                            </th>
-                            <th className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">
-                                <Button onClick={() => handleSort('nameEnglish')} className="flex items-center gap-2">
-                                Location 
-                                <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                                </Button>
-                            </th>
-                            <th className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">
-                                <Button onClick={() => handleSort('numberOfEvents')} className="flex items-center gap-2">
-                                Number of Events
-                                <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                                </Button>
-                            </th>
-                            <th className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">Add to Favourite</th>
-                        </tr>
-                    </thead>
+    </div>
+    <Card className="h-full w-full bg-white shadow-md">
+        <CardBody className="overflow-scroll px-0">
+            <table className="mt-4 w-full min-w-max table-auto text-left">
+                <thead>
+                    <tr>
+                        <th className="border-y border-gray-200 bg-gray-50 p-4">
+                            <Button onClick={() => handleSort('id')} className="flex items-center gap-2 text-gray-800">
+                            ID 
+                            <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
+                            </Button>
+                        </th>
+                        <th className="border-y border-gray-200 bg-gray-50 p-4">
+                            <Button onClick={() => handleSort('nameEnglish')} className="flex items-center gap-2 text-gray-800">
+                            Location 
+                            <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
+                            </Button>
+                        </th>
+                        <th className="border-y border-gray-200 bg-gray-50 p-4">
+                            <Button onClick={() => handleSort('numberOfEvents')} className="flex items-center gap-2 text-gray-800">
+                            Number of Events
+                            <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
+                            </Button>
+                        </th>
+                        <th className="border-y border-gray-200 bg-gray-50 p-4">Add to Favourite</th>
+                    </tr>
+                </thead>
                 <tbody>
                 {rowsToShow.length === 0 && (
                   <tr>
@@ -255,24 +255,24 @@ const ListOfLocation = () => {
                 )} 
                 {rowsToShow.map(({ id, nameEnglish, numberOfEvents, venuelongitude, venuelatitude }, index) => {
                   const isLast = index === rowsToShow.length - 1;
-                  const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
+                  const classes = isLast ? "p-4" : "p-4 border-b border-gray-200";  // Adjusted border color
                   return (
                     <tr key={id}>
                       <td className={classes}>
-                        <Typography variant="small" color="blue-gray" className="font-normal">{id}</Typography>
+                        <Typography variant="small" color="gray" className="font-normal">{id}</Typography>
                       </td>
                       <td className={classes}>
-                        <Link to={`/map?lat=${venuelatitude}&lng=${venuelongitude}`} className="text-blue-500 hover:underline">
-                            <Typography variant="small" color="blue-gray" className="font-normal">{nameEnglish}</Typography>
+                        <Link to={`/map?lat=${venuelatitude}&lng=${venuelongitude}&status=${'true'}`} className="text-blue-600 hover:underline">
+                            <Typography variant="small" color="gray" className="font-normal">{nameEnglish}</Typography>
                         </Link>
                       </td>
                       <td className={classes}>
-                        <Typography variant="small" color="blue-gray" className="font-normal">{numberOfEvents}</Typography>
+                        <Typography variant="small" color="gray" className="font-normal">{numberOfEvents}</Typography>
                       </td>
                       <td className={classes}>
                         <Tooltip content="Add to Favourite">
                           <IconButton variant="text">
-                            <PencilIcon className="h-4 w-4" />
+                            <PencilIcon className="h-4 w-4 text-gray-800" /> 
                           </IconButton>
                         </Tooltip>
                       </td>
@@ -282,10 +282,10 @@ const ListOfLocation = () => {
               </tbody>
             </table>
           </CardBody>
-          <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
+          <CardFooter className="flex items-center justify-between border-t border-gray-200 p-4 bg-gray-50">
             <div className="flex items-center space-x-2">
               <Button
-                className='text-gray-500'
+                className='text-gray-800'
                 onClick={previousPage}
                 disabled={currentPage === 0}
                 variant="outlined"
@@ -293,7 +293,7 @@ const ListOfLocation = () => {
                 Previous
               </Button>
               <Button
-                className='text-gray-500'
+                className='text-gray-800'
                 onClick={nextPage}
                 disabled={currentPage === totalFilteredPages - 1}
                 variant="outlined"
@@ -301,7 +301,7 @@ const ListOfLocation = () => {
                 Next
               </Button>
             </div>
-            <Typography variant="small" color="blue-gray" className="font-normal select-none">
+            <Typography variant="small" color="gray" className="font-normal select-none">
               Page {currentPage + 1} of {totalFilteredPages}
             </Typography>
           </CardFooter>

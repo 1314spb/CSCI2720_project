@@ -136,12 +136,17 @@ const Map = () => {
             marker.getElement().addEventListener('click', () => {
                 setSelectedVenue(venue);
                 // 將地圖中心移動到選中地點並放大
-                if (venue.latitude !== userLocation.lat || venue.longitude !== userLocation.lng) {
-                    map.flyTo({ center: [venue.longitude, venue.latitude], zoom: 14 });
-                }
+                map.flyTo({ center: [venue.longitude, venue.latitude], zoom: 14 });
             });
         });
-    }, [map, venues , userLocation]);
+        const queryParams = new URLSearchParams(location.search);
+        const triggercommentarea = queryParams.get('status') === 'true';
+        
+        if (triggercommentarea && venues.length > 0) {
+            setSelectedVenue(venues[0]); // Automatically select the first venue
+            map.flyTo({ center: [venues[0].longitude, venues[0].latitude], zoom: 14 });
+        }
+    }, [map, venues, location.search]);
 
     // 處理添加評論
     const handleAddComment = (venueId, comment) => {

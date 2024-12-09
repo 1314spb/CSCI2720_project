@@ -58,11 +58,7 @@ const ListOfEvents = () => {
             const aValue = sortOrder.column === 'price' ? parseFloat(a.price) || 0 : a[sortOrder.column];
             const bValue = sortOrder.column === 'price' ? parseFloat(b.price) || 0 : b[sortOrder.column];
 
-            if (sortOrder.direction === 'asc') {
-                return aValue > bValue ? 1 : -1;
-            } else {
-                return aValue < bValue ? 1 : -1;
-            }
+            return sortOrder.direction === 'asc' ? aValue > bValue ? 1 : -1 : aValue < bValue ? 1 : -1;
         });
 
         setRowsToShow(sortedEvents.slice(startIndex, startIndex + rowsLimit));
@@ -99,63 +95,34 @@ const ListOfEvents = () => {
     };
 
     return (
-        <div className="min-h-screen h-full flex items-center">
-            <div className="w-full max-w-5xl px-2">
+        <div className="min-h-screen h-full flex items-center bg-gray-100"> 
+            <div className="w-full max-w-5xl px-4">
                 <div className="flex space-x-5 mb-4">
                     <input
                         type="text"
                         placeholder="Search by title..."
                         value={search}
                         onChange={handleSearch}
-                        className="border border-gray-300 rounded-md p-2 w-60"
+                        className="border border-gray-400 rounded-md p-2 w-60 text-gray-900"  // Dark text
                     />
                 </div>
-                <Card className="h-full w-full">
+                <Card className="h-full w-full bg-white shadow-lg">
                     <CardBody className="overflow-scroll px-0">
                         <table className="mt-4 w-full table-fixed text-left">
                             <thead>
                                 <tr>
-                                    <th className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">
-                                        <Button 
-                                            onClick={() => handleSort('date')} 
-                                            className="flex items-center gap-2" 
-                                            aria-label="Sort by date"
-                                        >
-                                            Date
-                                            <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                                        </Button>
-                                    </th>
-                                    <th className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">
-                                        <Button 
-                                            onClick={() => handleSort('venueId')} 
-                                            className="flex items-center gap-2" 
-                                            aria-label="Sort by venue"
-                                        >
-                                            Venue
-                                            <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                                        </Button>
-                                    </th>
-                                    <th className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">
-                                        <Button 
-                                            onClick={() => handleSort('title')} 
-                                            className="flex items-center gap-2" 
-                                            aria-label="Sort by title"
-                                        >
-                                            Title
-                                            <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                                        </Button>
-                                    </th>
-                                    <th className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">
-                                        <Button 
-                                            onClick={() => handleSort('price')} 
-                                            className="flex items-center gap-2" 
-                                            aria-label="Sort by price"
-                                        >
-                                            Price
-                                            <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
-                                        </Button>
-                                    </th>
-                                    <th className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">Add to Favourite</th>
+                                    {TABLE_HEAD.map((head) => (
+                                        <th className="border-b border-gray-200 bg-gray-50 p-4" key={head}>
+                                            <Button 
+                                                onClick={() => handleSort(head.toLowerCase())} 
+                                                className="flex items-center gap-2 text-gray-900" 
+                                                aria-label={`Sort by ${head.toLowerCase()}`}
+                                            >
+                                                {head}
+                                                <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" />
+                                            </Button>
+                                        </th>
+                                    ))}
                                 </tr>
                             </thead>
                             <tbody>
@@ -170,20 +137,20 @@ const ListOfEvents = () => {
                                 )}
                                 {rowsToShow.map(({ id, date, venueId, title, price }, index) => {
                                     const isLast = index === rowsToShow.length - 1;
-                                    const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
+                                    const classes = isLast ? "p-4" : "p-4 border-b border-gray-200";
                                     return (
                                         <tr key={id}>
                                             <td className={`${classes} break-words whitespace-normal`}>
-                                                <Typography variant="small" color="blue-gray" className="font-normal">{date}</Typography>
+                                                <Typography variant="small" color="gray-900" className="font-normal">{date}</Typography>
                                             </td>
                                             <td className={`${classes} break-words whitespace-normal`}>
-                                                <Typography variant="small" color="blue-gray" className="font-normal">{venueId}</Typography>
+                                                <Typography variant="small" color="gray-900" className="font-normal">{venueId}</Typography>
                                             </td>
                                             <td className={`${classes} break-words whitespace-normal`}>
-                                                <Typography variant="small" color="blue-gray" className="font-normal">{title}</Typography>
+                                                <Typography variant="small" color="gray-900" className="font-normal">{title}</Typography>
                                             </td>
                                             <td className={`${classes} break-words whitespace-normal`}>
-                                                <Typography variant="small" color="blue-gray" className="font-normal">{price}</Typography>
+                                                <Typography variant="small" color="gray-900" className="font-normal">{price}</Typography>
                                             </td>
                                             <td className={classes}>
                                                 <Tooltip content="Add to Favourite">
@@ -191,7 +158,7 @@ const ListOfEvents = () => {
                                                         variant="text" 
                                                         aria-label="Add to favourite"
                                                     >
-                                                        <PencilIcon className="h-4 w-4" />
+                                                        <PencilIcon className="h-4 w-4 text-gray-800" /> 
                                                     </IconButton>
                                                 </Tooltip>
                                             </td>
@@ -201,10 +168,10 @@ const ListOfEvents = () => {
                             </tbody>
                         </table>
                     </CardBody>
-                    <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
+                    <CardFooter className="flex items-center justify-between border-t border-gray-200 p-4 bg-gray-50"> 
                         <div className="flex items-center space-x-2">
                             <Button
-                                className='text-gray-500'
+                                className='text-gray-900'
                                 onClick={previousPage}
                                 disabled={currentPage === 0}
                                 variant="outlined"
@@ -213,7 +180,7 @@ const ListOfEvents = () => {
                                 Previous
                             </Button>
                             <Button
-                                className='text-gray-500'
+                                className='text-gray-900'
                                 onClick={nextPage}
                                 disabled={currentPage === totalFilteredPages - 1}
                                 variant="outlined"
@@ -222,7 +189,7 @@ const ListOfEvents = () => {
                                 Next
                             </Button>
                         </div>
-                        <Typography variant="small" color="blue-gray" className="font-normal select-none">
+                        <Typography variant="small" color="gray" className="font-normal select-none">
                             Page {currentPage + 1} of {totalFilteredPages}
                         </Typography>
                     </CardFooter>
