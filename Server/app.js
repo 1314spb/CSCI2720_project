@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 // utils
 const {readXMLFile} = require('./utils/xmlUtils');
+const cookieParser = require('cookie-parser');
 // Database set up
 const mongoose = require('mongoose');
 const db = require('./config/database');
@@ -14,8 +15,14 @@ const LOCATION_LIMIT = 10;
 const auth = require('./middlewares/auth');
 const admin = require('./middlewares/admin');
 const user = require('./middlewares/user');
+const protected = require('./middlewares/protectedRoutes');
 
-app.use(cors());
+app.use(cookieParser());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+}));
+// app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parses URL-encoded reques
 // Serve static files from the React app in the 'dist' directory
@@ -160,21 +167,16 @@ db.once('open', () => {
     app.use('/api/auth', auth);
     app.use('/api/admin', admin);
     app.use('/api/user', user);
+    app.use('/protected', protected);
 
-    app.post('/test', (req, res) => {
-        try{
-            console.log("post request got!");
-            res.status(200).send('Hell0');
-        }catch(error){
-            res.status(404).send(error);
-        }
-    })
-
-    // Not Found
-    // app.get('/*', (req, res) => {
-    //     res.status(404).send('Page not found');
-    // })
-
+    // app.post('/test', (req, res) => {
+    //     try{
+    //         console.log("post request got!");
+    //         res.status(200).send('Hell0');
+    //     }catch(error){
+    //         res.status(404).send(error);
+    //     }
+    // });
 })
 
 

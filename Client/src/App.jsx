@@ -30,15 +30,17 @@ function Main() {
         {location.pathname !== '/login' && <NavBar />}
         <main className="flex flex-col items-center justify-center h-screen w-full">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/list_of_location" element={<List_of_Location />} />
-            <Route path="/list_of_events" element={<List_of_Events />} />
-            <Route path="/map" element={<Map />} />
-            <Route path="/favourite" element={<Favourite />} />
-            
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/usersmanager" element={<UsersManager />} />
+
+            <Route path='/' element={<ProtectedRoute />}>
+              <Route path="" element={<Home />} />
+              <Route path="list_of_location" element={<List_of_Location />} />
+              <Route path="list_of_events" element={<List_of_Events />} />
+              <Route path="map" element={<Map />} />
+              <Route path="favourite" element={<Favourite />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="usersmanager" element={<UsersManager />} />
+            </Route>
           </Routes>
         </main>
       </div>

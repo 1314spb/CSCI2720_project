@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import { TEInput, TERipple } from "tw-elements-react";
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import axios from "axios";
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -9,47 +10,48 @@ const Login = () => {
     const navigate = useNavigate();
   
     const handleLogin = async (e) => {
-      e.preventDefault();
-  
-      try {
-        console.log(username);
-        console.log(password);
-        const response = await fetch('http://localhost:3000/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username, password }),
-        });
-  
-        const data = await response.json();
-  
-        if (response.ok) {
-          // Store user data in cookies
-          Cookies.set('userId', data.userData.userId, { expires: 1 });
-          Cookies.set('username', data.userData.username, { expires: 1 });
-          Cookies.set('email', data.userData.email, { expires: 1 });
-          Cookies.set('admin', data.userData.admin, { expires: 1 });
-          Cookies.set('favLoc', data.userData.favLoc, { expires: 1 });
-  
-          // Redirect to dashboard
-          navigate('/');
-        console.log("User login successfully!");
-        } else {
-            if(response.status === 401) {
-                setError(data.message)
-            }else{
-                setError('Unknown error');
+        e.preventDefault();
+      
+        try {
+          console.log(username);
+          console.log(password);
+      
+          const response = await axios.post(
+            'http://localhost:3000/api/auth/login',
+            { username: username, password: password },
+            {
+              headers: {
+                'Content-Type':'application/json',
+              },
+              withCredentials: true,
             }
-        //   alert(data.error || 'Login failed');
-
+          );
+      
+          const data = response.data;
+        //   Cookies.set('userId', data.userData.userId, { expires: 1 });
+          Cookies.set('username', data.userData.username, { expires: 1 });
+        //   Cookies.set('authToken', data.userData.authToken, { expires: 1 });
+        //   Cookies.set('admin', data.userData.admin, { expires: 1 });
+        //   Cookies.set('favLoc', JSON.stringify(data.userData.favLoc), { expires: 1 });
+      
+          console.log('User login successfully: ', response.data.message);
+          navigate('/');
+        } catch (error) {
+          // Error handling
+          if (error.response) {
+            if (error.response.status === 401) {
+              setError(error.response.data.message || 'Invalid credentials');
+            } else {
+              setError(error.response.data.message || 'Unknown error occurred');
+            }
+          } else if (error.request) {
+            setError('No response from server');
+          } else {
+            setError('An error occurred while setting up the request');
+          }
+          console.error('Error:', error);
         }
-      } catch (error) {
-        console.error('Error:', error);
-        setError('An error occurred during conencting to server')
-        // alert('An error occurred during login.');
-      }
-    };
+      };
     return (
         <section class="bg-gray-50 dark:bg-gray-900 w-full">
             <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">

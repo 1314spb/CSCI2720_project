@@ -1,16 +1,34 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import React, { useEffect, useState } from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import axios from 'axios';
 
-const ProtectedRoute = ({ children }) => {
-  const userEmail = Cookies.get('email');
+const ProtectedRoute = ({ redirectTo = '/login' }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(null); 
+  const [loading, setLoading] = useState(true);
 
-  if (!userEmail) {
-    // Redirect to login if not logged in
-    return <Navigate to="/login" />;
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/auth/checkAuth', {
+          withCredentials: true, // Include cookies
+        });
+        setIsAuthenticated(true); // Set authentication status
+      } catch (error) {
+        console.error('Authentication check failed:', error);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false); // Stop the loading state
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Show a loader while checking authentication
   }
 
-  return children;
+  return isAuthenticated ? <Outlet /> : <Navigate to={redirectTo} />;
 };
 
 export default ProtectedRoute;

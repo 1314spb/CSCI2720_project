@@ -1,9 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
+import fetchUserData from '../../../fetchUserData';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
+import axios from "axios";
 
 const NavBar = () => {
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  const handleLogout = async () => {
+    try{
+      await axios.post(
+        'http://localhost:3000/api/auth/logout',{},
+        { withCredentials: true }
+      );
+      console.log('User log out successfully');
+      Cookies.remove('username');
+      setUser(null);
+      setError('');
+      navigate('/login');
+    }catch(error){
+      console.log('Error during logout', error);
+    }
+  }
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
   };
@@ -15,12 +37,20 @@ const NavBar = () => {
   };
 
   useEffect(() => {
+    fetchUserData(setUser, setError);
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  if(error){
+    return <div>{error}</div>
+  }
+  if(!user){
+    return <div>Loading...</div>
+  }
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900 w-full fixed z-50 opacity-85 top-0 left-0 right-0">
@@ -47,8 +77,8 @@ const NavBar = () => {
           {isDropdownOpen && (
             <div className="absolute right-0 z-50 my-2 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 mt-72">
               <div className="px-4 py-3">
-                <span className="block text-sm text-gray-900 dark:text-white select-none">Jane Cooper</span>
-                <span className="block text-sm text-gray-500 truncate dark:text-gray-400 select-none">jane.cooper@example.com</span>
+                <span className="block text-sm text-gray-900 dark:text-white select-none">{user.user.username}</span>
+                <span className="block text-sm text-gray-500 truncate dark:text-gray-400 select-none">{user.user.email}</span>
               </div>
               <ul className="py-2" aria-labelledby="user-menu-button">
                 <li>
@@ -61,7 +91,11 @@ const NavBar = () => {
                   <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Settings</a>
                 </li>
                 <li>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a>
+                  
+                  <a href="#" onClick={()=>{handleLogout()}} 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                      Sign out
+                          </a>
                 </li>
               </ul>
             </div>
