@@ -4,6 +4,7 @@ const path = require('path');
 // utils
 const {readXMLFile} = require('./utils/xmlUtils');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 // Database set up
 const mongoose = require('mongoose');
 const db = require('./config/database');
@@ -126,24 +127,6 @@ db.once('open', async () => {
                     console.log('Error reading data from xml file:');
                     console.log(err);
                 })
-                    // Count the number of events for each location and update the Location collection
-            const eventCounts = await Event.aggregate([
-                {
-                $group: {
-                    _id: '$locId', // Group by location ID
-                    count: { $sum: 1 }, // Count the number of events for each location
-                },
-                },
-            ]);
-
-            for (const { _id, count } of eventCounts) {
-                await Location.findOneAndUpdate(
-                { locId: _id },
-                { numEvents: count }, // Update the numEvents field
-                { new: true }
-                );
-                console.log(`Updated numEvents for Location ${_id}: ${count}`);
-            }
             })
             .catch((err) => {
                 console.log('Error reading data from xml file:');
@@ -156,15 +139,38 @@ db.once('open', async () => {
         console.log(err);
     })
     
+    //Load number of events to each locations
+    const missingNumEvents = await Location.find({ numEvents: { $exists: false } });
+    if (missingNumEvents.length > 0) {
+        const eventCounts = await Event.aggregate([
+        {
+            $group: {
+            _id: '$locId', // Group by locId
+            count: { $sum: 1 }, // Count events per location
+            },
+        },
+        ]);
 
+        for (const { _id, count } of eventCounts) {
+        await Location.findOneAndUpdate(
+            { locId: _id },
+            { numEvents: count }, 
+            { new: true }
+        );
+        console.log(`Updated numEvents for Location ${_id}: ${count}`);
+        }
+    } else {
+        console.log('All locations already have numEvents initialized');
+    }
     // Initialize admin account
     User.find({admin: true})
-    .then((user) => {
+    .then(async (user) => {
        if (user.length === 0) {
+        const hashedPassword = await bcrypt.hash('admin123', 10);
         const newAdmin = new User({
             username: 'admin',
             email: 'admin@email.com',
-            password: 'admin123',
+            password: hashedPassword,
             admin: true
         })
         newAdmin.save()
