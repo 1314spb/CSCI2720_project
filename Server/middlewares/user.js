@@ -9,7 +9,9 @@ const authenticateUser = require('./authCheck');
 
 router.get('/getPersonalInfo', authenticateUser ,async (req, res) => {
     try {
-        const user = await User.findOne(req.body.userId);
+        console.log("User ID need to find is ",req.user.userId);
+        const {userId} = req.user;
+        const user = await User.findOne({userId});
         if (!user) {
           return res.status(404).json({ message: 'User not found' });
         }
@@ -30,7 +32,8 @@ router.get('/getPersonalInfo', authenticateUser ,async (req, res) => {
     });
 
 // GET http://server-address/api/user/location
-router.get('/location', (req, res) => {
+router.get('/locations',authenticateUser  ,(req, res) => {
+    console.log("locations fetching request got");
     Location.find({})
     .then((locations) => {
         res.send(locations);
@@ -60,39 +63,62 @@ router.get('/event', (req, res) => {
 })
 
 // PUT http://server-address/api/user/addfavlocation
-router.put('/addfavlocation/:userId/:locId', (req, res) => {
-    const userId = req.userId;
-    const locId = req.locId;
+// router.put('/addfavlocation/:userId/:locId', (req, res) => {
+//     const userId = req.userId;
+//     const locId = req.locId;
 
-    User.findOneAndUpdate(
-        {userId: userId},
-        {$addToSet: {favloc: locId}},
-        {new: true}
-    )
-    .then((user) => {
-        console.log('Favourite Location added successfully');
-        console.log(user);
-        res.status(201).json({
-            message: 'success'
+//     User.findOneAndUpdate(
+//         {userId: userId},
+//         {$addToSet: {favloc: locId}},
+//         {new: true}
+//     )
+//     .then((user) => {
+//         console.log('Favourite Location added successfully');
+//         console.log(user);
+//         res.status(201).json({
+//             message: 'success'
+//         })
+//     })
+//     .catch((err) => {
+//         console.log('Failed to add location');
+//         console.log(err);
+//         res.status(400).json({
+//             message: 'failed'
+//         })
+//     })
+// }) .populate('favLoc', 'locId name numEvents')
+
+router.get('/userFavorites', authenticateUser , async (req, res) => {
+    console.log("Start getting userFavorites");
+    try{
+        const {userId} = req.user;
+        const user = await User.findOne({userId});
+        const favLoc = await Location.find({locId: {$in: user.favLoc }});
+        console.log('favLoc is ', favLoc);
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({
+            message: 'Favorite location sent successfully',
+            favLoc: favLoc,
         })
-    })
-    .catch((err) => {
-        console.log('Failed to add location');
-        console.log(err);
-        res.status(400).json({
-            message: 'failed'
-        })
-    })
+    }catch(error){
+        console.error('Error during fetching favorite locations', error);
+        res.status(500).json({message: 'Error during fetching favorite locations'});
+    }
+ 
 })
 
-router.put('/addFavLoc/:userId', async (req, res) => {
+router.put('/addFavLoc',authenticateUser, async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const {userId} = req.user;
+        const user = await User.findOne({userId});
         const { favoriteLocationIds } = req.body; 
         console.log(favoriteLocationIds);
         const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            { $addToSet: { favLoc: favoriteLocationIds} },
+            user,
+            { $addToSet: { favLoc: [favoriteLocationIds]} },
             { new: true }
         )
         if(!updatedUser){
@@ -115,14 +141,16 @@ router.put('/addFavLoc/:userId', async (req, res) => {
     }
 });
 
-router.put('/removeFavLoc/:userId', async (req, res) => {
+router.put('/removeFavLoc', authenticateUser, async (req, res) => {
     try {
-        const userId = req.params.userId;
+        const {userId} = req.user;
+        const user = await User.findOne({userId});
+        console.log("User found : ", user);
         const { favoriteLocationIds } = req.body; 
-        // console.log(favoriteLocationIds);
+        console.log(favoriteLocationIds);
         const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            { $pull: { favLoc: {$in: favoriteLocationIds} } },
+            user,
+            { $pull: { favLoc: {$in: [favoriteLocationIds]} } },
             { new: true }
         )
         if(!updatedUser){
@@ -140,7 +168,7 @@ router.put('/removeFavLoc/:userId', async (req, res) => {
             },
         });
     } catch (error) {
-        console.log("Got error while removing favorite location");
+        console.log("Got error while removing favorite location : ", error);
         res.status(500).json({ message: error.message });
     }
 });

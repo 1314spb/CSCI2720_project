@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-
+import axios from 'axios';
 
 const ListOfLocation = () => {
     const [venues, setVenues] = useState([]);
@@ -11,63 +11,100 @@ const ListOfLocation = () => {
     const [sortOrder, setSortOrder] = useState('default');
     const [selectedArea, setSelectedArea] = useState('default'); // State for selected area
 
-    useEffect(() => {
-        const fetchVenues = async () => {
-            try {
-                const response = await fetch('/venues.xml');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const text = await response.text();
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(text, 'application/xml');
-                const venuesList = Array.from(xml.getElementsByTagName('venue')).map(venue => ({
-                    id: venue.getAttribute('id'),
-                    nameEnglish: venue.getElementsByTagName('venuee')[0]?.textContent || 'N/A',
-                    numberOfEvents: 0,
-                    isFavorite: false,
-                    area: venue.getElementsByTagName('area')[0]?.textContent || 'N/A', // Assuming 'area' is in the XML
-                }));
-                setVenues(venuesList);
-            } catch (error) {
-                console.error("Loading venues.xml error:", error);
-            }
-        };
-        fetchVenues();
-    }, []);
-
-    useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const response = await fetch('/events.xml');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const text = await response.text();
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(text, 'application/xml');
-                const eventList = Array.from(xml.getElementsByTagName('event')).map(event => ({
-                    id: event.getAttribute('id'),
-                    venueid: event.getElementsByTagName('venueid')[0]?.textContent || 'N/A'
-                }));
-                setEvents(eventList);
-                countEvents(eventList);
-            } catch (error) {
-                console.error("Loading events.xml error:", error);
-            }
-        };
-        fetchEvents();
-    }, []);
-
-    const countEvents = (eventList) => {
-        setVenues(prevVenues => {
-            const updatedVenues = prevVenues.map(venue => {
-                const numberOfEvents = eventList.filter(event => event.venueid === venue.id).length;
-                return { ...venue, numberOfEvents };
+    const fetchVenues = async () => {
+        try {
+            // Fetch all locations
+            const locationsResponse = await axios.get('http://localhost:3000/api/user/locations', {
+              withCredentials: true,
             });
-            return updatedVenues;
-        });
-    };
+      
+            // Fetch user favorites
+            const userFavoritesResponse = await axios.get('http://localhost:3000/api/user/userFavorites', {
+              withCredentials: true,
+            });
+
+            const userFavoritesResData = userFavoritesResponse.data.favLoc;
+            // console.log("userFavoritesResponse.data are ", userFavoritesResData);
+            const userFavorites = userFavoritesResData.map((fav) => fav.locId); // Extract locId array
+            // console.log("userFavorites are ", userFavorites);
+            // Combine locations with favorite status
+            const locationsWithFavorites = locationsResponse.data.map((location) => ({
+              ...location,
+              isFavorite: userFavorites.includes(location.locId), // Determine favorite status
+            }));
+      
+            console.log("Locations with favorites : ", locationsWithFavorites);
+            const venueList = locationsWithFavorites.map((venue) => ({
+                id: venue.locId,
+                nameEnglish: venue.name,
+                numberOfEvents: venue.numEvents,
+                isFavorite: venue.isFavorite,
+              }));
+            setVenues(venueList); // Set the locations state
+          } catch (error) {
+            console.error('Error fetching locations or user favorites:', error);
+          }
+        };
+    useEffect(() => {
+        // const fetchVenues = async () => {
+        //     try {
+        //         const response = await fetch('/venues.xml');
+        //         if (!response.ok) {
+        //             throw new Error(`HTTP error! status: ${response.status}`);
+        //         }
+        //         const text = await response.text();
+        //         const parser = new DOMParser();
+        //         const xml = parser.parseFromString(text, 'application/xml');
+        //         const venuesList = Array.from(xml.getElementsByTagName('venue')).map(venue => ({
+        //             id: venue.getAttribute('id'),
+        //             nameEnglish: venue.getElementsByTagName('venuee')[0]?.textContent || 'N/A',
+        //             : 0,
+        //             isFavorite: false,
+        //             area: venue.getElementsByTagName('area')[0]?.textContent || 'N/A', // Assuming 'area' is in the XML
+        //         }));
+        //         setVenues(venuesList);
+        //     } catch (error) {
+        //         console.error("Loading venues.xml error:", error);
+        //     }
+        // };
+
+        
+        fetchVenues();
+        console.log("Venues are : ", venues);
+    }, []);
+
+    // useEffect(() => {
+    //     const fetchEvents = async () => {
+    //         try {
+    //             const response = await fetch('/events.xml');
+    //             if (!response.ok) {
+    //                 throw new Error(`HTTP error! status: ${response.status}`);
+    //             }
+    //             const text = await response.text();
+    //             const parser = new DOMParser();
+    //             const xml = parser.parseFromString(text, 'application/xml');
+    //             const eventList = Array.from(xml.getElementsByTagName('event')).map(event => ({
+    //                 id: event.getAttribute('id'),
+    //                 venueid: event.getElementsByTagName('venueid')[0]?.textContent || 'N/A'
+    //             }));
+    //             setEvents(eventList);
+    //             countEvents(eventList);
+    //         } catch (error) {
+    //             console.error("Loading events.xml error:", error);
+    //         }
+    //     };
+    //     fetchEvents();
+    // }, []);
+
+    // const countEvents = (eventList) => {
+    //     setVenues(prevVenues => {
+    //         const updatedVenues = prevVenues.map(venue => {
+    //             const numberOfEvents = eventList.filter(event => event.venueid === venue.id).length;
+    //             return { ...venue, numberOfEvents };
+    //         });
+    //         return updatedVenues;
+    //     });
+    // };
 
     useEffect(() => {
         const startIndex = currentPage * rowsLimit;
@@ -127,8 +164,42 @@ const ListOfLocation = () => {
         });
     };
 
-    const changeFavority = () => {
+    const changeFavority = async (locId, isFavorite) => {
         // Logic for changing favorite status
+        try {
+            if (isFavorite) {
+              await axios.put(
+                'http://localhost:3000/api/user/removeFavLoc',
+                { favoriteLocationIds: locId },
+                {
+                    headers: {
+                        'Content-Type':'application/json',
+                      },
+                    withCredentials: true 
+                }
+              );
+            } else {
+              await axios.put(
+                'http://localhost:3000/api/user/addFavLoc',
+                { favoriteLocationIds: locId },
+                { 
+                    headers: {
+                    'Content-Type':'application/json',
+                    },
+                    withCredentials: true 
+                }
+              );
+            }
+      
+            setVenues((prevVenues) =>
+              prevVenues.map((location) =>
+                location.locId === locId ? { ...location, isFavorite: !isFavorite } : location
+              )
+            );
+            fetchVenues();
+          } catch (error) {
+            console.error('Error toggling favorite status:', error);
+          }
     };
 
     return (
@@ -185,7 +256,11 @@ const ListOfLocation = () => {
                                     <td className="py-2 px-3 font-normal text-base border-t whitespace-nowrap">{data.nameEnglish}</td>
                                     <td className="py-2 px-3 font-normal text-base border-t whitespace-nowrap">{data.numberOfEvents}</td>
                                     <td className="py-2 px-3 text-base font-normal border-t whitespace-nowrap">
-                                        <button onClick={changeFavority}>{data.isFavorite ? "Yes" : "No"}</button>
+                                        <button onClick={(e)=>{
+                                            e.preventDefault();
+                                            changeFavority(data.id, data.isFavorite);
+                                        }
+                                            }>{data.isFavorite ? "Yes" : "No"}</button>
                                     </td>
                                 </tr>
                             ))}

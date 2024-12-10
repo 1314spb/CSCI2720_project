@@ -72,28 +72,57 @@ const SortableTable = () => {
   const displayedData = sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   useEffect(() => {
-    const fetchVenues = async () => {
-      try {
-        const response = await axios.get('http://localhost:5173/venues.xml', {
-          responseType: 'text',
-        });
+    // const fetchVenues = async () => {
+    //   try {
+    //     const response = await axios.get('http://localhost:5173/venues.xml', {
+    //       responseType: 'text',
+    //     });
 
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(response.data, "text/xml");
-        const venueNodes = xmlDoc.getElementsByTagName("venue");
+    //     const parser = new DOMParser();
+    //     const xmlDoc = parser.parseFromString(response.data, "text/xml");
+    //     const venueNodes = xmlDoc.getElementsByTagName("venue");
 
-        const venueList = Array.from(venueNodes).map((venue) => ({
-          location: venue.getElementsByTagName("venuee")[0].textContent,
-          number_of_events: Math.floor(Math.random() * 100),
-        }));
-        setVenues(venueList);
-      } catch (error) {
-        console.error("Error fetching venues:", error);
+    //     const venueList = Array.from(venueNodes).map((venue) => ({
+    //       location: venue.getElementsByTagName("venuee")[0].textContent,
+    //       number_of_events: Math.floor(Math.random() * 100),
+    //     }));
+    //     setVenues(venueList);
+    //   } catch (error) {
+    //     console.error("Error fetching venues:", error);
+    //   }
+    // };
+
+    // fetchVenues();
+  const fetchVenues = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/user/userFavorites', {
+        headers: {
+          'Content-Type':'application/json',
+        },
+        withCredentials: true, // Include HTTP-only cookies in the request
+      });
+
+      // console.log('Response is : ', favLoc);
+
+      const favLoc = response.data.favLoc;
+      console.log('Response is : ', favLoc);
+      if(!Array.isArray(favLoc)){
+        throw new Error('Invalid response format');
       }
-    };
+      const venueList = favLoc.map((venue) => ({
+        location: venue.name,
+        number_of_events: venue.numEvents,
+      }));
+      console.log(venueList);
+      setVenues(venueList);
+    } catch (error) {
+      console.error("Error fetching venues:", error);
+    }
+  };
 
-    fetchVenues();
-  }, []);
+  fetchVenues();
+}
+  , []);
 
   return (
     <Card className="h-full w-full">

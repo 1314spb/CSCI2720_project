@@ -17,6 +17,10 @@ const LocationSchema = mongoose.Schema({
     long: {
         type: Number,
         required: true,
+    },
+    numEvents: {
+        type: Number,
+        default: 0,
     }
 })
 

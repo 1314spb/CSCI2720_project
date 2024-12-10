@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const fetchUserData = async (setUser, setError) => {
+  console.log("fetchUserData is running");
   try {
     const response = await axios.get('http://localhost:3000/api/user/getPersonalInfo', {
       headers: {

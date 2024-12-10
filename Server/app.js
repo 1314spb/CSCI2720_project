@@ -43,7 +43,7 @@ app.use((req, res, next) => {
   
 db.on('error', console.error.bind(console, 'Connection error:'));
 
-db.once('open', () => {
+db.once('open', async () => {
     console.log('Connection is open...');
 
     // Use the models
@@ -56,7 +56,7 @@ db.once('open', () => {
     .then((data) => {
         if (data.length === 0) {
             readXMLFile('../datasets/venues.xml')
-            .then((LocationData) => {
+            .then(async (LocationData) => {
                 // Load venue data first, choosing only 10 of them
                 const LocationList = []
                 let i = 0;
@@ -126,6 +126,24 @@ db.once('open', () => {
                     console.log('Error reading data from xml file:');
                     console.log(err);
                 })
+                    // Count the number of events for each location and update the Location collection
+            const eventCounts = await Event.aggregate([
+                {
+                $group: {
+                    _id: '$locId', // Group by location ID
+                    count: { $sum: 1 }, // Count the number of events for each location
+                },
+                },
+            ]);
+
+            for (const { _id, count } of eventCounts) {
+                await Location.findOneAndUpdate(
+                { locId: _id },
+                { numEvents: count }, // Update the numEvents field
+                { new: true }
+                );
+                console.log(`Updated numEvents for Location ${_id}: ${count}`);
+            }
             })
             .catch((err) => {
                 console.log('Error reading data from xml file:');
@@ -137,6 +155,7 @@ db.once('open', () => {
         console.log('Failed to read from Location');
         console.log(err);
     })
+    
 
     // Initialize admin account
     User.find({admin: true})

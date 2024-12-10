@@ -81,12 +81,16 @@ const NavBar = () => {
                 <span className="block text-sm text-gray-500 truncate dark:text-gray-400 select-none">{user.user.email}</span>
               </div>
               <ul className="py-2" aria-labelledby="user-menu-button">
+              {user.user?.admin && (
+                <>
                 <li>
                   <a href="/usersmanager" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">User Manager</a>
                 </li>
                 <li>
                   <a href="/locationmanager" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Location Manager</a>
                 </li>
+                </>
+                ) }
                 <li>
                   <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Settings</a>
                 </li>
