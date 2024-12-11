@@ -14,6 +14,7 @@ import UsersManager from './components/UsersManager/UsersManager';
 import EventsManager from './components/EventsManager/EventsManager';
 import Favourite from './components/Favourite/Favourite';
 import Profile from './components/Profile/Profile';
+import ProtectedRoute from './ProtectedRoute';
 
 function App() {
   return (
@@ -38,7 +39,6 @@ function Main() {
               <Route path="list_of_events" element={<List_of_Events />} />
               <Route path="map" element={<Map />} />
               <Route path="favourite" element={<Favourite />} />
-              <Route path="dashboard" element={<Dashboard />} />
               <Route path="usersmanager" element={<UsersManager />} />
               <Route path="eventsmanager" element={<EventsManager />} />
               <Route path="profile" element={<Profile />} />

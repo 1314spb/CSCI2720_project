@@ -45,7 +45,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     console.log("Login request recieved");
     try{
-        const {username , password} = req.body;
+        const {username , password, rememberMe} = req.body;
         // const user = await mongoose.model('User').findOne({ email: req.body.email });
         const user = await mongoose.model('User').findOne({ username: username });
         if (!user) {
@@ -58,16 +58,18 @@ router.post('/login', async (req, res) => {
             console.log("Wrong password");
             return res.status(401).json({ message: 'Wrong password' });
         }
+        const tokenExpiry = rememberMe ? '7d' : '1d' ;
+        console.log("tokenExpiry is : ", tokenExpiry);
         const token = jwt.sign({ userId: user.userId, username: user.username}, 
             "mySecretKey",
-            {expiresIn: '1h'}
+            {expiresIn: tokenExpiry}
         );
 
         res.cookie('authToken', token, {
             httpOnly: true,
             secure: false,
             sameSite: 'lax',
-            maxAge: 24 * 60 * 60 * 1000, // 1d
+            maxAge: rememberMe? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000, //7d : 1d
         });
 
         // const favLocInfo = await Location.find({ locId: { $in: user.favLoc } });

@@ -93,8 +93,9 @@ router.get('/userFavorites', authenticateUser , async (req, res) => {
     try{
         const {userId} = req.user;
         const user = await User.findOne({userId});
+        // console.log(user);
         const favLoc = await Location.find({locId: {$in: user.favLoc }});
-        console.log('favLoc is ', favLoc);
+        // console.log('favLoc is ', favLoc);
         if (!user) {
           return res.status(404).json({ message: 'User not found' });
         }
