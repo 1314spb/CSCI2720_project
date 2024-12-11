@@ -53,10 +53,10 @@ db.once('open', async () => {
     const Event = require('./models/Event');
 
     // Initialize Database - Load Location and Event Data from datasets into Database if the Database is empty
-    Location.find({})
-    .then((data) => {
+    await Location.find({})
+    .then(async (data) => {
         if (data.length === 0) {
-            readXMLFile('../datasets/venues.xml')
+            await readXMLFile('../datasets/venues.xml')
             .then(async (LocationData) => {
                 // Load venue data first, choosing only 10 of them
                 const LocationList = []
@@ -85,8 +85,8 @@ db.once('open', async () => {
                     });
                 });
                 // Load event data of the 10 venues chosen
-                readXMLFile('../datasets/events.xml')
-                .then((EventData) => {
+                await readXMLFile('../datasets/events.xml')
+                .then(async (EventData) => {
                     const filteredEventList = LocationList.flatMap(location => {
                         const locId = location.$.id;
                         const venue = location.venuee[0];
@@ -99,11 +99,12 @@ db.once('open', async () => {
                                 presenter: event.presenterorge[0],
                                 description: event.desce[0],
                                 venue: venue,
-                                locId: parseInt(locId)
+                                locId: parseInt(locId),
+                                price: event.pricee[0],
                             }))
                     })
                     // Save into database
-                    filteredEventList.forEach((event) => {
+                    await filteredEventList.forEach(async (event) => {
                         let newEvent = new Event({
                             eventId: event.eventId,
                             title: event.title,
@@ -111,9 +112,10 @@ db.once('open', async () => {
                             presenter: event.presenter,
                             description: event.description,
                             venue: event.venue,
-                            locId: event.locId
+                            locId: event.locId,
+                            price: event.price,
                         })
-                        newEvent.save()
+                        await newEvent.save()
                         .then(() => {
                             console.log('New event created successfully');
                         })
@@ -127,6 +129,29 @@ db.once('open', async () => {
                     console.log('Error reading data from xml file:');
                     console.log(err);
                 })
+            const missingNumEvents = await Location.find({ numEvents: 0});
+            // console.log("missingNumEvents: ", missingNumEvents);
+            if (missingNumEvents.length > 0) {
+                const eventCounts = await Event.aggregate([
+                {
+                    $group: {
+                    _id: '$locId', // Group by locId
+                    count: { $sum: 1 }, // Count events per location
+                    },
+                },
+                ]);
+
+                for (const { _id, count } of eventCounts) {
+                await Location.findOneAndUpdate(
+                    { locId: _id },
+                    { numEvents: count }, 
+                    { new: true }
+                );
+                console.log(`Updated numEvents for Location ${_id}: ${count}`);
+                }
+            } else {
+                console.log('All locations already have numEvents initialized');
+            }
             })
             .catch((err) => {
                 console.log('Error reading data from xml file:');
@@ -140,7 +165,8 @@ db.once('open', async () => {
     })
     
     //Load number of events to each locations
-    const missingNumEvents = await Location.find({ numEvents: { $exists: false } });
+    const missingNumEvents = await Location.find({ numEvents: 0});
+    // console.log("missingNumEvents: ", missingNumEvents);
     if (missingNumEvents.length > 0) {
         const eventCounts = await Event.aggregate([
         {
@@ -193,15 +219,6 @@ db.once('open', async () => {
     app.use('/api/admin', admin);
     app.use('/api/user', user);
     app.use('/protected', protected);
-
-    // app.post('/test', (req, res) => {
-    //     try{
-    //         console.log("post request got!");
-    //         res.status(200).send('Hell0');
-    //     }catch(error){
-    //         res.status(404).send(error);
-    //     }
-    // });
 })
 
 

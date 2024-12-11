@@ -71,6 +71,51 @@ const SortableTable = () => {
   const totalPages = Math.ceil(sortedData.length / rowsPerPage);
   const displayedData = sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
+  const fetchVenues = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/user/userFavorites', {
+        headers: {
+          'Content-Type':'application/json',
+        },
+        withCredentials: true, // Include HTTP-only cookies in the request
+      });
+
+      // console.log('Response is : ', favLoc);
+
+      const favLoc = response.data.favLoc;
+      console.log('Response is : ', favLoc);
+      if(!Array.isArray(favLoc)){
+        throw new Error('Invalid response format');
+      }
+      const venueList = favLoc.map((venue) => ({
+        locId: venue.locId,
+        location: venue.name,
+        number_of_events: venue.numEvents,
+      }));
+      console.log(venueList);
+      setVenues(venueList);
+    } catch (error) {
+      console.error("Error fetching venues:", error);
+    }
+  };
+
+  const removeFavLoc = async (locId) => {
+    try {
+      const response = await axios.put('http://localhost:3000/api/user/removeFavLoc', 
+        { favoriteLocationIds: locId},
+        {
+        headers: {
+          'Content-Type':'application/json',
+        },
+        withCredentials: true, // Include HTTP-only cookies in the request
+      });
+
+      console.log('Response is : ', response.data);
+      fetchVenues();
+    } catch (error) {
+      console.error("Error deleting favorite location:", error);
+    }
+  };
   useEffect(() => {
     // const fetchVenues = async () => {
     //   try {
@@ -93,32 +138,6 @@ const SortableTable = () => {
     // };
 
     // fetchVenues();
-  const fetchVenues = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/api/user/userFavorites', {
-        headers: {
-          'Content-Type':'application/json',
-        },
-        withCredentials: true, // Include HTTP-only cookies in the request
-      });
-
-      // console.log('Response is : ', favLoc);
-
-      const favLoc = response.data.favLoc;
-      console.log('Response is : ', favLoc);
-      if(!Array.isArray(favLoc)){
-        throw new Error('Invalid response format');
-      }
-      const venueList = favLoc.map((venue) => ({
-        location: venue.name,
-        number_of_events: venue.numEvents,
-      }));
-      console.log(venueList);
-      setVenues(venueList);
-    } catch (error) {
-      console.error("Error fetching venues:", error);
-    }
-  };
 
   fetchVenues();
 }
@@ -171,7 +190,7 @@ const SortableTable = () => {
               </tr>
             )}
             {displayedData.map(
-              ({ location, number_of_events }, index) => {
+              ({ locId, location, number_of_events }, index) => {
                 const isLast = index === displayedData.length - 1;
                 const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
                 return (
@@ -188,7 +207,11 @@ const SortableTable = () => {
 
                     <td className={classes}>
                       <Tooltip content="Remove">
-                        <IconButton variant="text">
+                        <IconButton variant="text" 
+                            onClick={(e)=>{
+                              e.preventDefault();
+                              removeFavLoc(locId)
+                            }}>
                           <PencilIcon className="h-4 w-4" />
                         </IconButton>
                       </Tooltip>

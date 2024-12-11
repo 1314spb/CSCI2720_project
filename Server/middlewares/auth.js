@@ -109,7 +109,8 @@ router.post('/logout', async (req, res) => {
 router.get('/checkAuth', (req, res) => {
     console.log("checkAuth is running");
     const token = req.cookies.authToken;
-    console.log("token is : ", token);
+    console.log("token got");
+    // console.log("token is : ", token);
 
     if (!token) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -117,7 +118,7 @@ router.get('/checkAuth', (req, res) => {
   
     try {
       const decoded = jwt.verify(token, 'mySecretKey'); 
-      console.log("decoded is : ", decoded);// Verify JWT token
+      console.log("decoded is : ", decoded);
       res.status(200).json({ message: 'Authenticated', user: decoded });
     } catch (error) {
         if(error.name === 'TokenExpiredError') {

@@ -9,7 +9,8 @@ const authenticateUser = require('./authCheck');
 
 router.get('/getPersonalInfo', authenticateUser ,async (req, res) => {
     try {
-        console.log("User ID need to find is ",req.user.userId);
+        console.log("getPersonalInfo is running");
+        // console.log("User ID need to find is ",req.user.userId);
         const {userId} = req.user;
         const user = await User.findOne({userId});
         if (!user) {
@@ -33,7 +34,7 @@ router.get('/getPersonalInfo', authenticateUser ,async (req, res) => {
 
 // GET http://server-address/api/user/location
 router.get('/location',authenticateUser  ,(req, res) => {
-    console.log("locations fetching request got");
+    console.log("Locations fetching request got");
     Location.find({})
     .then((locations) => {
         res.send(locations);
@@ -48,7 +49,8 @@ router.get('/location',authenticateUser  ,(req, res) => {
 })
 
 // GET http://server-address/api/user/event
-router.get('/event', (req, res) => {
+router.get('/event',authenticateUser, (req, res) => {
+    console.log("Events fetching request got");
     Event.find({})
     .then((events) => {
         res.send(events);

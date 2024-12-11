@@ -25,7 +25,7 @@ const ProtectedRoute = ({ redirectTo = '/login' }) => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Show a loader while checking authentication
+    return <div>Loading...</div>;
   }
 
   return isAuthenticated ? <Outlet /> : <Navigate to={redirectTo} />;
