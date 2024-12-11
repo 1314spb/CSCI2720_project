@@ -1,10 +1,13 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-// utils
-const {readXMLFile} = require('./utils/xmlUtils');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
+const csrf = require('csurf');
+
+// utils
+const {readXMLFile} = require('./utils/xmlUtils');
 // Database set up
 const mongoose = require('mongoose');
 const db = require('./config/database');
@@ -17,6 +20,7 @@ const auth = require('./middlewares/auth');
 const admin = require('./middlewares/admin');
 const user = require('./middlewares/user');
 const protected = require('./middlewares/protectedRoutes');
+const crsfProtect = require('./middlewares/crsfProtection');
 
 app.use(cookieParser());
 app.use(cors({
@@ -28,6 +32,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parses URL-encoded reques
 // Serve static files from the React app in the 'dist' directory
 app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
+
+const crsfProtection = csrf({cookie: true});
+app.use(crsfProtection);
 
 app.use((req, res, next) => {
     // res.setHeader("Access-Control-Allow-Origin", "*");
@@ -42,6 +49,14 @@ app.use((req, res, next) => {
     next();
   });
   
+// CSRF error handling
+app.use((err, req, res, next) => {
+    if (err.code === 'EBADCSRFTOKEN') {
+        res.status(403).json({ message: 'Invalid CSRF token' });
+    } else {
+        next(err);
+    }
+});
 db.on('error', console.error.bind(console, 'Connection error:'));
 
 db.once('open', async () => {
@@ -219,6 +234,9 @@ db.once('open', async () => {
     app.use('/api/admin', admin);
     app.use('/api/user', user);
     app.use('/protected', protected);
+    app.use('/api/csrf', crsfProtect);
+
+
 })
 
 

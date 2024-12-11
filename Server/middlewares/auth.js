@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 module.exports = router;
@@ -60,6 +61,7 @@ router.post('/login', async (req, res) => {
         }
         const tokenExpiry = rememberMe ? '7d' : '1d' ;
         console.log("tokenExpiry is : ", tokenExpiry);
+        // console.log("process.env.JWT_SECRET_KEY is ", process.env.JWT_SECRET_KEY);
         const token = jwt.sign({ userId: user.userId, username: user.username}, 
             "mySecretKey",
             {expiresIn: tokenExpiry}
@@ -117,8 +119,8 @@ router.get('/checkAuth', (req, res) => {
     }
   
     try {
-      const decoded = jwt.verify(token, 'mySecretKey'); 
-      console.log("decoded is : ", decoded);
+      const decoded = jwt.verify(token, "mySecretKey"); 
+      console.log("decoded is : ", decoded);  
       res.status(200).json({ message: 'Authenticated', user: decoded });
     } catch (error) {
         if(error.name === 'TokenExpiredError') {
