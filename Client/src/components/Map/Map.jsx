@@ -9,11 +9,26 @@ const Map = () => {
     const [userLocation, setUserLocation] = useState({ lng: 114.206, lat: 22.42 });
     const [map, setMap] = useState(null);
     const [userMarker, setUserMarker] = useState(null);
-    const [comments, setComments] = useState({});
+    const [comments, setComments] = useState({
+        '36311771': [
+            "這個地方真的很棒，特別適合家庭出遊！",
+            "每次來都能發現新的美景，值得一來再來！",
+            "環境非常宜人，適合散步和野餐！"
+        ],
+        '87210195': [
+            "這裡的食物非常美味，特別推薦他們的特色菜！",
+            "服務態度很好，讓人感覺賓至如歸！",
+            "無論是午餐還是晚餐，這裡都是個不錯的選擇！"
+        ],
+        '36310035': [
+            "這個景點的歷史非常有趣，值得一探究竟！",
+            "拍照的好地方，特別是夕陽西下時！",
+            "裡面的展覽很精彩，讓我學到了很多新知識！"
+        ]
+    });
     const [selectedVenue, setSelectedVenue] = useState(null);
     const [favorites, setFavorites] = useState([]);
 
-    // 獲取用戶位置
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -21,20 +36,17 @@ const Map = () => {
                 setUserLocation({ lng: longitude, lat: latitude });
             },
             (error) => {
-                console.error("獲取位置時出錯: ", error);
+                console.error("Error fetching location: ", error);
                 setUserLocation({ lng: 114.206, lat: 22.42 });
             }
         );
     }, []);
 
-    // 獲取 venues.xml 數據
     useEffect(() => {
         const fetchVenues = async () => {
             try {
                 const response = await fetch('/venues.xml');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const text = await response.text();
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(text, "application/xml");
@@ -62,14 +74,13 @@ const Map = () => {
 
                 setVenues(venuesArray);
             } catch (error) {
-                console.error("加載 venues.xml 時出錯：", error);
+                console.error("Error loading venues.xml: ", error);
             }
         };
 
         fetchVenues();
     }, []);
 
-    // 初始化地圖
     useEffect(() => {
         const mapInstance = new mapboxgl.Map({
             container: 'map',
@@ -78,18 +89,15 @@ const Map = () => {
             zoom: 13
         });
 
-        // 設置地圖實例
         setMap(mapInstance);
 
         mapInstance.addControl(new mapboxgl.NavigationControl());
 
-        // 添加用戶標記
         const newMarker = new mapboxgl.Marker({ color: 'blue' })
             .setLngLat([userLocation.lng, userLocation.lat])
             .addTo(mapInstance);
         setUserMarker(newMarker);
 
-        // 隱藏 Mapbox 的版權信息
         mapInstance.on('load', () => {
             const copyrightControl = document.querySelector('.mapboxgl-ctrl-bottom-right');
             if (copyrightControl) {
@@ -97,27 +105,21 @@ const Map = () => {
             }
         });
 
-        // 更新標記位置
         const updateMarkerPosition = () => {
             if (userMarker) {
                 userMarker.setLngLat([userLocation.lng, userLocation.lat]);
             }
         };
 
-        // 監聽地圖移動事件
         mapInstance.on('move', updateMarkerPosition);
-
-        // 在地圖初始化後更新標記位置
         updateMarkerPosition();
 
-        // 清理地圖
         return () => {
             if (userMarker) userMarker.remove();
             mapInstance.remove();
         };
     }, [userLocation.lng, userLocation.lat]);
 
-    // 添加地點標記並設置點擊事件
     useEffect(() => {
         if (!map) return;
 
@@ -126,16 +128,13 @@ const Map = () => {
                 .setLngLat([venue.longitude, venue.latitude])
                 .addTo(map);
 
-            // 點擊標記時設置選中地點
             marker.getElement().addEventListener('click', () => {
                 setSelectedVenue(venue);
-                // 將地圖中心移動到選中地點並放大
                 map.flyTo({ center: [venue.longitude, venue.latitude], zoom: 14 });
             });
         });
     }, [map, venues]);
 
-    // 處理添加評論
     const handleAddComment = (venueId, comment) => {
         if (!comment.trim()) return;
 
@@ -148,10 +147,8 @@ const Map = () => {
     const handleToggleFavorite = (venueId) => {
         setFavorites(prevFavorites => {
             if (prevFavorites.includes(venueId)) {
-                // 如果已收藏，則移除
                 return prevFavorites.filter(id => id !== venueId);
             } else {
-                // 如果未收藏，則添加
                 return [...prevFavorites, venueId];
             }
         });
@@ -161,17 +158,13 @@ const Map = () => {
         <div className='relative w-full h-screen'>
             <div id="map" className='w-full h-full' />
 
-            {/* 側邊欄 */}
             {selectedVenue && (
                 <div className="absolute top-0 left-0 h-full w-80 bg-white shadow-lg z-20 overflow-y-auto p-6 transition-transform transform duration-300 ease-in-out">
-
-                    <h2 className="text-lg font-bold mb-2">{selectedVenue.nameC}</h2>
-                    {/* <h3 className="text-lg text-gray-700 mb-4">{selectedVenue.nameE}</h3> */}
-
+                    <h2 className="text-lg font-bold mb-2">{selectedVenue.nameE}</h2>
                     <div className="comments-section">
-                        <h4 className="text-base mb-2 flex">評論</h4>
+                        <h4 className="text-base mb-2">Comment</h4>
                         {comments[selectedVenue.id] && comments[selectedVenue.id].length > 0 ? (
-                            <div className="space-y-2 flex">
+                            <div className="space-y-2">
                                 {comments[selectedVenue.id].map((comment, index) => (
                                     <p key={index} className="bg-gray-100 p-2 rounded">
                                         {comment}
@@ -179,7 +172,7 @@ const Map = () => {
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-gray-500 flex">暫無評論。</p>
+                            <p className="text-gray-500">No Comment</p>
                         )}
                     </div>
 
@@ -196,7 +189,7 @@ const Map = () => {
                         <input
                             type="text"
                             name={`comment-input-${selectedVenue.id}`}
-                            placeholder="輸入你的評論"
+                            placeholder="What is your comment?"
                             required
                             className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -204,22 +197,21 @@ const Map = () => {
                             type="submit"
                             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                         >
-                            添加
+                            Add Comment
                         </button>
                     </form>
                     <button
                         onClick={() => handleToggleFavorite(selectedVenue.id)}
                         className={`mt-4 px-4 py-2 rounded transition-colors flex ${favorites.includes(selectedVenue.id)
-                                ? 'bg-red-500 hover:bg-red-600'
-                                : 'bg-yellow-500 hover:bg-yellow-600'
+                            ? 'bg-red-500 hover:bg-red-600'
+                            : 'bg-yellow-500 hover:bg-yellow-600'
                             } text-white`}
                     >
-                        {favorites.includes(selectedVenue.id) ? '移除收藏' : '加入收藏'}
+                        {favorites.includes(selectedVenue.id) ? 'Remove from favourite' : 'Add into favourite'}
                     </button>
                 </div>
             )}
 
-            {/* 覮屏外的遮罩層，以便點擊遮罩時關閉側邊欄 */}
             {selectedVenue && (
                 <div
                     className="absolute top-0 left-0 w-full h-full bg-black opacity-25 z-10"

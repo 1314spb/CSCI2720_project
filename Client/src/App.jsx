@@ -1,8 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
-import ProtectedRoute from './ProtectedRoute';
-import { useState } from 'react'
 import './App.css'
 
 import NavBar from './components/NavBar/NavBar';
@@ -11,11 +9,11 @@ import List_of_Location from './components/List_of_Location/List_of_Location';
 import List_of_Events from './components/List_of_Events/List_of_Events';
 import Map from './components/Map/Map';
 import Login from './components/Login/Login';
-import Dashboard from './components/Dashboard/Dashboard';
-import UsersManager from './components/UsersManager/UsersManager';
-import Favourite from './components/Favourite/Favourite';
 import SignUp from './components/SignUp/SignUp';
-
+import UsersManager from './components/UsersManager/UsersManager';
+import EventsManager from './components/EventsManager/EventsManager';
+import Favourite from './components/Favourite/Favourite';
+import Profile from './components/Profile/Profile';
 
 function App() {
   return (
@@ -23,7 +21,7 @@ function App() {
       <Main />
     </Router>
   )
-  }
+}
 function Main() {
   const location = useLocation();
   return ( 
@@ -42,11 +40,13 @@ function Main() {
               <Route path="favourite" element={<Favourite />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="usersmanager" element={<UsersManager />} />
+              <Route path="eventsmanager" element={<EventsManager />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
           </Routes>
         </main>
       </div>
-  );
+  )
 }
 
 export default App;

@@ -12,10 +12,10 @@ import {
   CardFooter,
   IconButton,
   Tooltip,
+  Input,
 } from "@material-tailwind/react";
 
-// 表头定义
-const TABLE_HEAD = ["Location", "Number of Events", "Edit"];
+const TABLE_HEAD = ["Location", "Number of Events", "Remove"];
 
 const SortableTable = () => {
   const [venues, setVenues] = useState([]);
@@ -46,8 +46,8 @@ const SortableTable = () => {
       const lowerSearch = searchTerm.toLowerCase();
       data = data.filter(
         (row) =>
-          row.location.toLowerCase().includes(lowerSearch) ||
-          row.level.toLowerCase().includes(lowerSearch)
+          row.location.toLowerCase().includes(lowerSearch)
+
       );
     }
 
@@ -127,6 +127,16 @@ const SortableTable = () => {
   return (
     <Card className="h-full w-full">
       <CardBody className="overflow-scroll px-0">
+        <div className="mb-4">
+          <Input
+            type="text"
+            placeholder="Search by location"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="flex w-64"
+          />
+        </div>
+
         <table className="mt-4 w-full min-w-max table-auto text-left">
           <thead>
             <tr>
@@ -177,7 +187,7 @@ const SortableTable = () => {
                     </td>
 
                     <td className={classes}>
-                      <Tooltip content="Edit User">
+                      <Tooltip content="Remove">
                         <IconButton variant="text">
                           <PencilIcon className="h-4 w-4" />
                         </IconButton>

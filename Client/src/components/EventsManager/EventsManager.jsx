@@ -1,50 +1,99 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const initialUsers = [
+const initialEvents = [
   {
     id: 1,
     name: 'Jane Cooper',
-    email: 'jane.cooper@example.com',
-    title: 'Regional Paradigm Technician',
-    department: 'Optimization',
-    status: 'Active',
-    role: 'Admin',
-    avatar: 'https://i.pravatar.cc/150?img=1',
+    date: '2024-01-01',
+    time: '12:00 PM - 2:00 PM',
+    location: 'East Kowloon Cultural Centre',
+    presenter: 'Tom Scholz',
+    price: 1200,
   },
   {
     id: 2,
     name: 'John Smith',
-    email: 'john.smith@example.com',
-    title: 'Senior Developer',
-    department: 'Engineering',
-    status: 'Inactive',
-    role: 'User',
-    avatar: 'https://i.pravatar.cc/150?img=2',
+    date: '2024-12-01',
+    time: '10:00 AM - 12:00 PM',
+    location: 'Hong Kong City Hall (Concert Hall)',
+    presenter: 'Tom Holland',
+    price: 3000,
   },
-  // Add more user objects as needed
+  {
+    id: 3,
+    name: 'Jane Doe',
+    date: '2024-06-01',
+    time: '3:00 PM - 5:00 PM',
+    location: 'Hong Kong Cultural Centre',
+    presenter: 'Tom Hanks',
+    price: 5000,
+  },
+  {
+    id: 4,
+    name: 'John Doe',
+    date: '2024-03-01',
+    time: '6:00 PM - 8:00 PM',
+    location: 'Queen Elizabeth Stadium',
+    presenter: 'Tom Cruise',
+    price: 8000,
+  },
+  {
+    id: 5,
+    name: 'Tom Cruise',
+    date: '2024-09-01',
+    time: '9:00 PM - 11:00 PM',
+    location: 'Kowloonbay International Trade & Exhibition Centre',
+    presenter: 'Tom Hardy',
+    price: 10000,
+  }
 ];
 
-const UsersManager = () => {
-  const [users, setUsers] = useState(initialUsers);
+const EventsManager = () => {
+  const [events, setEvents] = useState(initialEvents);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
-  // Handler to open modal and set selected user
-  const handleEditClick = (user) => {
-    setSelectedUser(user);
+  const [startTime, setStartTime] = useState('12:00');
+  const [endTime, setEndTime] = useState('14:00');
+
+  const handleEventTimeChange = (eventTime) => {
+    const [start, end] = eventTime.split(' - ');
+    setStartTime(convertTo24Hour(start));
+    setEndTime(convertTo24Hour(end));
+  };
+
+  const convertTo24Hour = (time) => {
+    const [timePart, modifier] = time.split(' ');
+    let [hours, minutes] = timePart.split(':');
+    if (modifier === 'PM' && hours !== '12') {
+      hours = parseInt(hours, 10) + 12;
+    }
+    if (modifier === 'AM' && hours === '12') {
+      hours = '00';
+    }
+    return `${hours}:${minutes}`;
+  };
+
+  useEffect(() => {
+    handleEventTimeChange('12:00 PM - 2:00 PM');
+  }, []);
+
+  // Handler to open modal and set selected event
+  const handleEditClick = (event) => {
+    setSelectedLocation(event);
     setIsModalOpen(true);
   };
 
   // Handler to close modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedUser(null);
+    setSelectedLocation(null);
   };
 
   // Handler for form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setSelectedUser((prevUser) => ({
+    setSelectedLocation((prevUser) => ({
       ...prevUser,
       [name]: value,
     }));
@@ -53,18 +102,18 @@ const UsersManager = () => {
   // Handler to save changes
   const handleSaveChanges = (e) => {
     e.preventDefault();
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.id === selectedUser.id ? selectedUser : user
+    setEvents((prevUsers) =>
+      prevUsers.map((event) =>
+        event.id === selectedLocation.id ? selectedLocation : event
       )
     );
     handleCloseModal();
   };
 
-  // Handler to delete a user (Optional)
+  // Handler to delete a event (Optional)
   const handleDeleteClick = (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      setEvents((prevUsers) => prevUsers.filter((event) => event.id !== userId));
     }
   };
 
@@ -80,10 +129,11 @@ const UsersManager = () => {
         <thead className="bg-gray-50">
           <tr>
             {[
-              'Name',
-              'Password',
-              'Status',
-              'Role',
+              'Event Name',
+              'Location',
+              'Price',
+              'Presenter(s)',
+              'Date & Time',
               'Actions',
             ].map((header) => (
               <th
@@ -99,62 +149,61 @@ const UsersManager = () => {
 
         {/* Table Body */}
         <tbody className="bg-white divide-y divide-gray-200">
-          {users.map((user) => (
-            <tr key={user.id}>
+          {events.map((event) => (
+            <tr key={event.id}>
               {/* Name & Email */}
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
-                  {/* Avatar */}
-                  <div className="flex-shrink-0 h-10 w-10">
-                    <img
-                      className="h-10 w-10 rounded-full"
-                      src={user.avatar}
-                      alt={user.name}
-                    />
+
+
+                {/* User Info */}
+                <div className="ml-4">
+                  <div className="text-sm font-medium text-gray-900 text-left">
+                    {event.name}
                   </div>
-                  {/* User Info */}
-                  <div className="ml-4">
-                    <div className="text-sm font-medium text-gray-900 text-left">
-                      {user.name}
-                    </div>
-                    <div className="text-sm text-gray-500 text-left">{user.email}</div>
-                  </div>
+
                 </div>
+
               </td>
 
               {/* Title & Department */}
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900 text-left">{user.title}</div>
-                <div className="text-sm text-gray-500 text-left">{user.department}</div>
+                <div className="text-sm text-gray-900 text-left">{event.location}</div>
               </td>
 
               {/* Status */}
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span
-                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full text-left ${user.status === 'Active'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                    }`}
-                >
-                  {user.status}
-                </span>
-              </td>
+
 
               {/* Role */}
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-left">
-                {user.role}
+                ${event.price}
+              </td>
+
+              <td className="px-6 py-4 whitespace-nowrap flex">
+                <span
+                  className="px-2 inline-flex text-sm leading-5 font-semibold rounded-full text-left bg-green-100 text-green-800"
+                >
+                  {event.presenter}
+                </span>
+              </td>
+
+              {/* Email */}
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-left">
+                <div className="text-sm font-medium text-gray-900 text-left">
+                  {event.date}
+                </div>
+                <div className="text-sm text-gray-500 text-left">{event.time}</div>
               </td>
 
               {/* Actions */}
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex">
                 <button
-                  onClick={() => handleEditClick(user)}
+                  onClick={() => handleEditClick(event)}
                   className="text-indigo-600 hover:text-indigo-900 mr-2"
                 >
-                  Edit
+                  Update
                 </button>
                 <button
-                  onClick={() => handleDeleteClick(user.id)}
+                  onClick={() => handleDeleteClick(event.id)}
                   className="text-red-600 hover:text-red-900"
                 >
                   Delete
@@ -163,14 +212,14 @@ const UsersManager = () => {
             </tr>
           ))}
 
-          {/* If no users */}
-          {users.length === 0 && (
+          {/* If no events */}
+          {events.length === 0 && (
             <tr>
               <td
                 className="px-6 py-4 whitespace-nowrap text-center text-gray-500"
                 colSpan="6"
               >
-                No users available.
+                No events available.
               </td>
             </tr>
           )}
@@ -178,7 +227,7 @@ const UsersManager = () => {
       </table>
 
       {/* Edit Modal */}
-      {isModalOpen && selectedUser && (
+      {isModalOpen && selectedLocation && (
         <div className="fixed z-10 inset-0 overflow-y-auto" onClick={handleCloseModal}>
           <div
             className="flex items-center justify-center min-h-screen px-4"
@@ -192,7 +241,7 @@ const UsersManager = () => {
               {/* Modal Header */}
               <div className="flex items-start justify-between p-5 border-b rounded-t">
                 <h3 className="text-xl font-semibold" id="modal-title">
-                  Edit User
+                  Update Event
                 </h3>
                 <button
                   type="button"
@@ -238,7 +287,7 @@ const UsersManager = () => {
                         type="text"
                         name="name"
                         id="name"
-                        value={selectedUser.name}
+                        value={selectedLocation.name}
                         onChange={handleInputChange}
                         className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
                                    rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
@@ -246,39 +295,37 @@ const UsersManager = () => {
                       />
                     </div>
 
-                    {/* Email */}
                     <div className="col-span-6 sm:col-span-3">
                       <label
-                        htmlFor="email"
+                        htmlFor="location"
                         className="text-sm font-medium text-gray-900 block mb-2"
                       >
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        id="email"
-                        value={selectedUser.email}
-                        onChange={handleInputChange}
-                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-400 sm:text-sm 
-                                   rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                        readOnly
-                      />
-                    </div>
-
-                    {/* Password */}
-                    <div className="col-span-6 sm:col-span-3">
-                      <label
-                        htmlFor="title"
-                        className="text-sm font-medium text-gray-900 block mb-2"
-                      >
-                        Password
+                        Location
                       </label>
                       <input
                         type="text"
-                        name="title"
-                        id="title"
-                        value={selectedUser.title}
+                        name="location"
+                        id="location"
+                        value={selectedLocation.location}
+                        onChange={handleInputChange}
+                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
+                                   rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+                        required
+                      />
+                    </div>
+                    {/* Email */}
+                    <div className="col-span-6 sm:col-span-3">
+                      <label
+                        htmlFor="date"
+                        className="text-sm font-medium text-gray-900 block mb-2"
+                      >
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        name="date"
+                        id="date"
+                        value={selectedLocation.date}
                         onChange={handleInputChange}
                         className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
                                    rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
@@ -286,55 +333,72 @@ const UsersManager = () => {
                       />
                     </div>
 
+                    <div className="col-span-6 sm:col-span-6 flex space-x-4">
+                      <div className="flex-1">
+                        <label htmlFor="start-time" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start time:</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
+                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                              <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <input type="time" id="start-time" className="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" min="09:00" max="18:00" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
+                        </div>
+                      </div>
 
-                    {/* Role */}
-                    <div className="col-span-6 sm:col-span-3">
-                      <label
-                        htmlFor="role"
-                        className="text-sm font-medium text-gray-900 block mb-2"
-                      >
-                        Role
-                      </label>
-                      <select
-                        name="role"
-                        id="role"
-                        value={selectedUser.role}
-                        onChange={handleInputChange}
-                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
-                                   rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                        required
-                      >
-                        <option value="Admin">Admin</option>
-                        <option value="User">User</option>
-                        {/* Add more roles as needed */}
-                      </select>
+                      <div className="flex-1">
+                        <label htmlFor="end-time" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End time:</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
+                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                              <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <input type="time" id="end-time" className="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" min="09:00" max="18:00" value={endTime} onChange={(e) => setEndTime(e.target.value)} required />
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Status */}
                     <div className="col-span-6 sm:col-span-3">
                       <label
-                        htmlFor="status"
+                        htmlFor="name"
                         className="text-sm font-medium text-gray-900 block mb-2"
                       >
-                        Status
+                        Price ($)
                       </label>
-                      <select
-                        name="status"
-                        id="status"
-                        value={selectedUser.status}
+                      <input
+                        type="text"
+                        name="department"
+                        id="department"
+                        value={selectedLocation.price}
                         onChange={handleInputChange}
                         className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
                                    rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                         required
+                      />
+                    </div>
+
+                    <div className="col-span-6 sm:col-span-3">
+                      <label
+                        htmlFor="price"
+                        className="text-sm font-medium text-gray-900 block mb-2"
                       >
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                      </select>
+                        Presenter(s)
+                      </label>
+                      <input
+                        type="text"
+                        name="presenter"
+                        id="presenter"
+                        value={selectedLocation.presenter}
+                        onChange={handleInputChange}
+                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
+                                   rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+                        required
+                      />
                     </div>
                   </div>
 
-                  {/* Submit Button */}
-                  <div className="p-6 rounded-b">
+                  <div className="p-6 border-gray-200 rounded-b">
                     <button
                       type="submit"
                       className="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 
@@ -354,4 +418,4 @@ const UsersManager = () => {
   );
 };
 
-export default UsersManager;
+export default EventsManager;
