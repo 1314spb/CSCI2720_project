@@ -32,7 +32,7 @@ router.get('/getPersonalInfo', authenticateUser ,async (req, res) => {
     });
 
 // GET http://server-address/api/user/location
-router.get('/locations',authenticateUser  ,(req, res) => {
+router.get('/location',authenticateUser  ,(req, res) => {
     console.log("locations fetching request got");
     Location.find({})
     .then((locations) => {

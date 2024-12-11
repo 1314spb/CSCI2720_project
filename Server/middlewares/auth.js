@@ -12,7 +12,7 @@ router.post('/register', async (req, res) => {
     console.log("Request recieved!");
     try{
         // res.status(200).json({msg: "Server post successfully"});
-        const {username, email, password, admin} = req.body;
+        const {username, email, password} = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log(`hashedPassword is ${hashedPassword}`)
         const userEmailExist = await User.findOne({email : email});
@@ -25,7 +25,7 @@ router.post('/register', async (req, res) => {
                 username,
                 email,
                 password: hashedPassword,
-                admin,
+                // admin,
                 favLoc: []
             });
             // console.log(newUser.username);

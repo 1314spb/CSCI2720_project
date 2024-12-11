@@ -14,7 +14,7 @@ const ListOfLocation = () => {
     const fetchVenues = async () => {
         try {
             // Fetch all locations
-            const locationsResponse = await axios.get('http://localhost:3000/api/user/locations', {
+            const locationsResponse = await axios.get('http://localhost:3000/api/user/location', {
               withCredentials: true,
             });
       

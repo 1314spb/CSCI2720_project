@@ -14,6 +14,7 @@ import Login from './components/Login/Login';
 import Dashboard from './components/Dashboard/Dashboard';
 import UsersManager from './components/UsersManager/UsersManager';
 import Favourite from './components/Favourite/Favourite';
+import SignUp from './components/SignUp/SignUp';
 
 
 function App() {
@@ -27,10 +28,11 @@ function Main() {
   const location = useLocation();
   return ( 
       <div className='w-full'>
-        {location.pathname !== '/login' && <NavBar />}
+        {location.pathname !== '/login'&& location.pathname !== '/signup' && <NavBar />}
         <main className="flex flex-col items-center justify-center h-screen w-full">
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
 
             <Route path='/' element={<ProtectedRoute />}>
               <Route path="" element={<Home />} />
