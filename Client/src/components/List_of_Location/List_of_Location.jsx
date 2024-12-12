@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
+import apiCsrf from '../../../apiCsrf';
 
 const ListOfLocation = () => {
     const [venues, setVenues] = useState([]);
@@ -168,8 +169,8 @@ const ListOfLocation = () => {
         // Logic for changing favorite status
         try {
             if (isFavorite) {
-              await axios.put(
-                'http://localhost:3000/api/user/removeFavLoc',
+              await apiCsrf.put(
+                '/api/user/removeFavLoc',
                 { favoriteLocationIds: locId },
                 {
                     headers: {
@@ -179,8 +180,8 @@ const ListOfLocation = () => {
                 }
               );
             } else {
-              await axios.put(
-                'http://localhost:3000/api/user/addFavLoc',
+              await apiCsrf.put(
+                '/api/user/addFavLoc',
                 { favoriteLocationIds: locId },
                 { 
                     headers: {

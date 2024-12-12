@@ -33,8 +33,18 @@ app.use(express.urlencoded({ extended: true })); // Parses URL-encoded reques
 // Serve static files from the React app in the 'dist' directory
 app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
 
+//CSRF protection
 const crsfProtection = csrf({cookie: true});
 app.use(crsfProtection);
+
+// CSRF error handling
+app.use((err, req, res, next) => {
+    if (err.code === 'EBADCSRFTOKEN') {
+        res.status(403).json({ message: 'Invalid CSRF token' });
+    } else {
+        next(err);
+    }
+});
 
 app.use((req, res, next) => {
     // res.setHeader("Access-Control-Allow-Origin", "*");
@@ -48,15 +58,7 @@ app.use((req, res, next) => {
     );
     next();
   });
-  
-// CSRF error handling
-app.use((err, req, res, next) => {
-    if (err.code === 'EBADCSRFTOKEN') {
-        res.status(403).json({ message: 'Invalid CSRF token' });
-    } else {
-        next(err);
-    }
-});
+
 db.on('error', console.error.bind(console, 'Connection error:'));
 
 db.once('open', async () => {

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import apiCsrf from "../../../apiCsrf";
+
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -16,12 +18,19 @@ const Login = () => {
           console.log(username);
           console.log(password);
           console.log("rememberMe is : ", rememberMe);
-          const response = await axios.post(
-            'http://localhost:3000/api/auth/login',
+          // const csrfResponse = await axios.get('http://localhost:3000/api/csrf/csrf-token', {
+          //     withCredentials: true,
+          // });
+          // console.log(csrfResponse.data);
+          // const csrfToken = csrfResponse.data.csrfToken;
+          // console.log("Fetched CSRF token: ", csrfToken);
+          const response = await apiCsrf.post(
+            '/api/auth/login',
             { username: username, password: password, rememberMe: rememberMe},
             {
               headers: {
                 'Content-Type':'application/json',
+                // 'csrf-token': csrfToken,
               },
               withCredentials: true,
             }

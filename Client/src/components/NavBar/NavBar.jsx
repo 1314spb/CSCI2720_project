@@ -3,6 +3,7 @@ import fetchUserData from '../../../fetchUserData';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import apiCsrf from '../../../apiCsrf';
 
 const NavBar = () => {
   const [user, setUser] = useState(null);
@@ -14,8 +15,8 @@ const NavBar = () => {
 
   const handleLogout = async () => {
     try{
-      await axios.post(
-        'http://localhost:3000/api/auth/logout',{},
+      await apiCsrf.post(
+        '/api/auth/logout',{},
         { withCredentials: true }
       );
       console.log('User log out successfully');

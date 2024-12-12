@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import apiCsrf from '../../../apiCsrf';
+import { ContractMissingABIError } from 'web3';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -23,7 +25,9 @@ const Signup = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/register', { username: name, email, password });
+      // console.log("HnadleSignUp is running");
+      const response = await axios.post('http://localhost:3000/api/auth/register',
+      { username: name, email, password },);
       setSuccess("Account created successfully!");
       navigate('/login');
     } catch (err) {

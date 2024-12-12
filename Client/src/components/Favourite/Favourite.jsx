@@ -14,6 +14,7 @@ import {
   Tooltip,
   Input,
 } from "@material-tailwind/react";
+import apiCsrf from '../../../apiCsrf';
 
 const TABLE_HEAD = ["Location", "Number of Events", "Remove"];
 
@@ -101,7 +102,7 @@ const SortableTable = () => {
 
   const removeFavLoc = async (locId) => {
     try {
-      const response = await axios.put('http://localhost:3000/api/user/removeFavLoc', 
+      const response = await apiCsrf.put('/api/user/removeFavLoc', 
         { favoriteLocationIds: locId},
         {
         headers: {
