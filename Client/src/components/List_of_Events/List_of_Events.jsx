@@ -10,6 +10,7 @@ import {
     IconButton,
     Tooltip,
 } from "@material-tailwind/react";
+import axios from 'axios';
 
 const TABLE_HEAD = ["Date", "Venue", "Title", "Price", "Add to Favourite"];
 
@@ -25,25 +26,45 @@ const ListOfEvents = () => {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const response = await fetch('/events.xml');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const text = await response.text();
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(text, 'application/xml');
-                const eventList = Array.from(xml.getElementsByTagName('event')).map(event => ({
-                    id: event.getAttribute('id'),
-                    title: event.getElementsByTagName('titlee')[0]?.textContent || 'N/A',
-                    venueId: event.getElementsByTagName('venueid')[0]?.textContent || 'N/A',
-                    date: event.getElementsByTagName('predateE')[0]?.textContent || 'N/A',
-                    price: event.getElementsByTagName('pricee')[0]?.textContent || 'N/A'
-                }));
-                setEvents(eventList);
-            } catch (error) {
-                console.error("Loading events.xml error:", error);
-            }
-        };
+        //         const response = await fetch('/events.xml');
+        //         if (!response.ok) {
+        //             throw new Error(`HTTP error! status: ${response.status}`);
+        //         }
+        //         const text = await response.text();
+        //         const parser = new DOMParser();
+        //         const xml = parser.parseFromString(text, 'application/xml');
+        //         const eventList = Array.from(xml.getElementsByTagName('event')).map(event => ({
+        //             id: event.getAttribute('id'),
+        //             title: event.getElementsByTagName('titlee')[0]?.textContent || 'N/A',
+        //             venueId: event.getElementsByTagName('venueid')[0]?.textContent || 'N/A',
+        //             date: event.getElementsByTagName('predateE')[0]?.textContent || 'N/A',
+        //             price: event.getElementsByTagName('pricee')[0]?.textContent || 'N/A'
+        //         }));
+        //         setEvents(eventList);
+        //     } catch (error) {
+        //         console.error("Loading events.xml error:", error);
+        //     }
+        // };
+
+        const eventsResponse = await axios.get('http://localhost:3000/api/user/event', {
+            withCredentials: true,
+          });
+        
+            console.log(eventsResponse.data);
+            const allEvents = eventsResponse.data;
+            const eventList = allEvents.map(event => ({
+                    id: event.eventId,
+                    title: event.title || 'N/A',
+                    venueId: event.locId || 'N/A',
+                    date: event.datetime || 'N/A',
+                    price: event.price|| 'N/A'
+            }))
+            setEvents(eventList);
+        }catch(error){
+            console.error('Error fetching events:', error);
+        }
+        }
+        
         fetchEvents();
     }, []);
 
