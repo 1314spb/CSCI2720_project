@@ -7,6 +7,7 @@ const Location = require('../models/Location');
 const Event = require('../models/Event');
 const authenticateUser = require('./authCheck');
 
+// GET http://server-address/api/user/getPersonalInfo
 router.get('/getPersonalInfo', authenticateUser ,async (req, res) => {
     try {
         console.log("getPersonalInfo is running");
@@ -26,11 +27,17 @@ router.get('/getPersonalInfo', authenticateUser ,async (req, res) => {
             favLoc: user.favLoc, // Assuming this is an array of location IDs
           },
         });
-      } catch (error) {
+    } catch (error) {
         console.error('Error fetching user data:', error);
         res.status(500).json({ message: 'Server error' });
-      }
-    });
+    }
+});
+
+// PUT http://server-address/api/user/editPersonalInfo
+router.get('/editPersonalInfo', authenticateUser, (req, res) => {
+    console.log('Edit personal info request received');
+    
+})
 
 // GET http://server-address/api/user/location
 router.get('/location',authenticateUser  ,(req, res) => {
@@ -64,32 +71,7 @@ router.get('/event',authenticateUser, (req, res) => {
     })
 })
 
-// PUT http://server-address/api/user/addfavlocation
-// router.put('/addfavlocation/:userId/:locId', (req, res) => {
-//     const userId = req.userId;
-//     const locId = req.locId;
-
-//     User.findOneAndUpdate(
-//         {userId: userId},
-//         {$addToSet: {favloc: locId}},
-//         {new: true}
-//     )
-//     .then((user) => {
-//         console.log('Favourite Location added successfully');
-//         console.log(user);
-//         res.status(201).json({
-//             message: 'success'
-//         })
-//     })
-//     .catch((err) => {
-//         console.log('Failed to add location');
-//         console.log(err);
-//         res.status(400).json({
-//             message: 'failed'
-//         })
-//     })
-// }) .populate('favLoc', 'locId name numEvents')
-
+// GET http://server-address/api/user/userFavorites
 router.get('/userFavorites', authenticateUser , async (req, res) => {
     console.log("Start getting userFavorites");
     try{
@@ -113,6 +95,7 @@ router.get('/userFavorites', authenticateUser , async (req, res) => {
  
 })
 
+// PUT http://server-address/api/user/addFavLoc
 router.put('/addFavLoc',authenticateUser, async (req, res) => {
     try {
         const {userId} = req.user;
@@ -144,6 +127,7 @@ router.put('/addFavLoc',authenticateUser, async (req, res) => {
     }
 });
 
+// PUT http://server-address/api/user/removeFavLoc
 router.put('/removeFavLoc', authenticateUser, async (req, res) => {
     try {
         const {userId} = req.user;

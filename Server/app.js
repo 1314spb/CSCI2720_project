@@ -146,29 +146,29 @@ db.once('open', async () => {
                     console.log('Error reading data from xml file:');
                     console.log(err);
                 })
-            const missingNumEvents = await Location.find({ numEvents: 0});
-            // console.log("missingNumEvents: ", missingNumEvents);
-            if (missingNumEvents.length > 0) {
-                const eventCounts = await Event.aggregate([
-                {
-                    $group: {
-                    _id: '$locId', // Group by locId
-                    count: { $sum: 1 }, // Count events per location
+                const missingNumEvents = await Location.find({ numEvents: 0});
+                // console.log("missingNumEvents: ", missingNumEvents);
+                if (missingNumEvents.length > 0) {
+                    const eventCounts = await Event.aggregate([
+                    {
+                        $group: {
+                        _id: '$locId', // Group by locId
+                        count: { $sum: 1 }, // Count events per location
+                        },
                     },
-                },
-                ]);
+                    ]);
 
-                for (const { _id, count } of eventCounts) {
-                await Location.findOneAndUpdate(
-                    { locId: _id },
-                    { numEvents: count }, 
-                    { new: true }
-                );
-                console.log(`Updated numEvents for Location ${_id}: ${count}`);
+                    for (const { _id, count } of eventCounts) {
+                    await Location.findOneAndUpdate(
+                        { locId: _id },
+                        { numEvents: count }, 
+                        { new: true }
+                    );
+                    console.log(`Updated numEvents for Location ${_id}: ${count}`);
+                    }
+                } else {
+                    console.log('All locations already have numEvents initialized');
                 }
-            } else {
-                console.log('All locations already have numEvents initialized');
-            }
             })
             .catch((err) => {
                 console.log('Error reading data from xml file:');

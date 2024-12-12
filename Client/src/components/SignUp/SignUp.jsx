@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import apiCsrf from '../../../apiCsrf';
-import { ContractMissingABIError } from 'web3';
+// import { ContractMissingABIError } from 'web3';
 
 const Signup = () => {
   const [name, setName] = useState('');
