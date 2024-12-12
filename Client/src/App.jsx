@@ -13,6 +13,8 @@ import SignUp from './components/SignUp/SignUp';
 import UsersManager from './components/UsersManager/UsersManager';
 import EventsManager from './components/EventsManager/EventsManager';
 import Favourite from './components/Favourite/Favourite';
+import No_Idea from './components/No_Idea/No_Idea';
+
 import Profile from './components/Profile/Profile';
 import ProtectedRoute from './ProtectedRoute';
 
