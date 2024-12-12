@@ -69,45 +69,6 @@ const Map = () => {
     };
 
     useEffect(() => {
-        // const fetchVenues = async () => {
-        //     try {
-        //         const response = await fetch('/venues.xml');
-        //         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        //         const text = await response.text();
-        //         const parser = new DOMParser();
-        //         const xmlDoc = parser.parseFromString(text, "application/xml");
-        //         const venueNodes = xmlDoc.getElementsByTagName('venue');
-        //         const venuesArray = [];
-
-        //         for (let i = 0; i < venueNodes.length; i++) {
-        //             const venue = venueNodes[i];
-        //             const id = venue.getAttribute('id');
-        //             const nameC = venue.getElementsByTagName('venuec')[0]?.textContent || '';
-        //             const nameE = venue.getElementsByTagName('venuee')[0]?.textContent || '';
-        //             const latitude = venue.getElementsByTagName('latitude')[0]?.textContent;
-        //             const longitude = venue.getElementsByTagName('longitude')[0]?.textContent;
-
-        //             if (latitude && longitude) {
-        //                 venuesArray.push({
-        //                     id,
-        //                     nameC,
-        //                     nameE,
-        //                     latitude: parseFloat(latitude),
-        //                     longitude: parseFloat(longitude)
-        //                 });
-        //             }
-        //         }
-
-        //         setVenues(venuesArray);
-        //     } catch (error) {
-        //         console.error("Error loading venues.xml: ", error);
-        //     }
-        // };
-
-        fetchVenues();
-    }, []);
-
-    useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
         const lat = parseFloat(queryParams.get('lat'));
         const lng = parseFloat(queryParams.get('lng'));
@@ -152,7 +113,7 @@ const Map = () => {
 
     useEffect(() => {
         if (!map) return;
-
+        
         venues.forEach((venue) => {
             const marker = new mapboxgl.Marker({ color: 'red' })
                 .setLngLat([venue.venuelongitude, venue.venuelatitude])
@@ -168,7 +129,7 @@ const Map = () => {
 
         if (triggercommentarea && venues.length > 0) {
             setSelectedVenue(venues[0]);
-            map.flyTo({ center: [venues[0].longitude, venues[0].latitude], zoom: 14 });
+            map.flyTo({ center: [venues[0].venuelongitude, venues[0].venuelatitude], zoom: 14 });
         }
     }, [map, venues, location.search]);
 
