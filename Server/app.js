@@ -27,11 +27,9 @@ app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true,
 }));
-// app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Parses URL-encoded reques
 // Serve static files from the React app in the 'dist' directory
-app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
 
 //CSRF protection
 const crsfProtection = csrf({cookie: true});
@@ -205,6 +203,7 @@ db.once('open', async () => {
     } else {
         console.log('All locations already have numEvents initialized');
     }
+    
     // Initialize admin account
     User.find({admin: true})
     .then(async (user) => {
