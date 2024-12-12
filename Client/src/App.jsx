@@ -14,6 +14,8 @@ import UsersManager from './components/UsersManager/UsersManager';
 import EventsManager from './components/EventsManager/EventsManager';
 import Favourite from './components/Favourite/Favourite';
 import Profile from './components/Profile/Profile';
+import No_Idea from './components/No_Idea/No_Idea';
+
 
 function App() {
   return (
