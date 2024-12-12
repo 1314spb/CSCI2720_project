@@ -34,9 +34,37 @@ router.get('/getPersonalInfo', authenticateUser ,async (req, res) => {
 });
 
 // PUT http://server-address/api/user/editPersonalInfo
-router.get('/editPersonalInfo', authenticateUser, (req, res) => {
+router.put('/editPersonalInfo', authenticateUser, async (req, res) => {
     console.log('Edit personal info request received');
-    
+    try {
+        const {userId} = req.user;
+        const user = await User.findOne({userId});
+        console.log("User found : ", user);
+        const { username, password } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const updatedUser = await User.findByIdAndUpdate(
+            user,
+            { 
+                username: username,
+                password: hashedPassword
+            },
+            { new: true }
+        )
+        if(!updatedUser){
+            return res.status(404).json({message: "User not found"});
+        }
+        res.status(200).json({
+            message: 'User information updated successfully',
+            userData: {
+                userId: updatedUser._id,
+                password: updatedUser.password
+            },
+        });
+    } catch (error) {
+        console.log("Error while updating user information : ", error);
+        res.status(500).json({ message: error.message });
+    }
+
 })
 
 // GET http://server-address/api/user/location
@@ -159,3 +187,48 @@ router.put('/removeFavLoc', authenticateUser, async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+
+// GET http://server-address/api/user/comment
+router.get('/comment/:locId', authenticateUser, (req, res) => {
+    const locId = req.params.locId;
+
+    Location.findOne({locId: locId})
+    .then((data) => {
+        console.log('location comments found');
+        res.send(data.comment);
+    })
+    .catch((err) => {
+        console.log('Error reading from Location');
+        res.status(500).json({message: 'Error reading from Location'})
+    })
+})
+
+// POST http://server-address/api/user/comment
+router.put('/addComment', authenticateUser, async (req, res) => {
+    try {
+        const {locId} = req.loc;
+        const loc = await Location.findOne({locId});
+        const { comment } = req.body; 
+        console.log(comment);
+        const updatedLocation = await Location.findByIdAndUpdate(
+            loc,
+            { $addToSet: { comment: [comment]} },
+            { new: true }
+        )
+        if(!updatedLocation){
+            return res.status(404).json({message: "User not found"});
+        }
+        console.log(`updatedLocation.comment is ${updatedLocation.comment}`);
+        const Comments = await Location.find({ locId: {$in: updatedLocation.comment}});
+        res.status(200).json({
+            message: 'Location comments updated successfully',
+            LocationData: {
+                locId: updatedLocation.locId,
+                comment: Comments,
+            },
+        });
+    } catch (error) {
+        console.log("Got error while updating comments");
+        res.status(500).json({ message: error.message });
+    }
+})
