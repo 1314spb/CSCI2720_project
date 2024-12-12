@@ -14,9 +14,9 @@ const NavBar = () => {
   const dropdownRef = useRef(null);
 
   const handleLogout = async () => {
-    try{
+    try {
       await apiCsrf.post(
-        '/api/auth/logout',{},
+        '/api/auth/logout', {},
         { withCredentials: true }
       );
       console.log('User log out successfully');
@@ -24,7 +24,7 @@ const NavBar = () => {
       setUser(null);
       setError('');
       navigate('/login');
-    }catch(error){
+    } catch (error) {
       console.log('Error during logout', error);
     }
   }
@@ -55,12 +55,13 @@ const NavBar = () => {
     };
   }, []);
 
-  if(error){
+  if (error) {
     return <div>{error}</div>
   }
-  if(!user){
+  if (!user) {
     return <div>Loading...</div>
   }
+  const userInitial = user.user.username ? user.user.username.charAt(0).toUpperCase() : 'U';
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900 w-full fixed z-50 opacity-85 top-0 left-0 right-0">
@@ -76,12 +77,12 @@ const NavBar = () => {
         <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative" ref={dropdownRef}>
           <button
             type="button"
-            className="flex items-center bg-gray-800 rounded-full p-0 w-9 h-9 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+            className="items-center bg-white-800 rounded-full p-0 w-9 h-9 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
             onClick={toggleDropdown}
             aria-haspopup="true"
             aria-expanded={isDropdownOpen}
           >
-            <img className="w-9 h-9 rounded-full" src="https://i.pravatar.cc/150?img=1" alt="user photo" />
+          {userInitial}
           </button>
 
           {isDropdownOpen && (
@@ -91,25 +92,25 @@ const NavBar = () => {
                 <span className="block text-sm text-gray-500 truncate dark:text-gray-400 select-none">{user.user.email}</span>
               </div>
               <ul className="py-2" aria-labelledby="user-menu-button">
-              {user.user?.admin && (
-                <>
-                <li>
-                  <a href="/usersmanager" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">User Manager</a>
-                </li>
-                <li>
-                  <a href="/eventsmanager" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Event Manager</a>
-                </li>
-                </>
-                ) }
+                {user.user?.admin && (
+                  <>
+                    <li>
+                      <a href="/usersmanager" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">User Manager</a>
+                    </li>
+                    <li>
+                      <a href="/eventsmanager" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Event Manager</a>
+                    </li>
+                  </>
+                )}
                 <li>
                   <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Profile</a>
                 </li>
                 <li>
-                  
-                  <a href="#" onClick={()=>{handleLogout()}} 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                      Sign out
-                          </a>
+
+                  <a href="#" onClick={() => { handleLogout() }}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                    Sign out
+                  </a>
                 </li>
               </ul>
             </div>
