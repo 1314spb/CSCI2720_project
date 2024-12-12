@@ -12,8 +12,8 @@ const authenticateUser = require('./authCheck');
 router.post('/register', async (req, res) => {
     console.log("Request recieved!");
     try{
-        console.log("Register request got");
-        console.log('Token received from client:', req.headers['csrf-token']);
+        // console.log("Register request got");
+        // console.log('Token received from client:', req.headers['csrf-token']);
         const {username, email, password} = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log(`hashedPassword is ${hashedPassword}`)

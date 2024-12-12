@@ -26,7 +26,7 @@ const Signup = () => {
 
     try {
       // console.log("HnadleSignUp is running");
-      const response = await axios.post('http://localhost:3000/api/auth/register',
+      const response = await apiCsrf.post('/api/auth/register',
       { username: name, email, password },);
       setSuccess("Account created successfully!");
       navigate('/login');
