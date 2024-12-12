@@ -11,6 +11,8 @@ import {
   IconButton,
   Tooltip,
 } from "@material-tailwind/react";
+import axios from 'axios';
+import apiCsrf from '../../../apiCsrf';
 
 const TABLE_HEAD = ["ID", "Location", "Number of Events", "Add to Favourite"];
 const Area = ["North District", "East Kowloon", "Sheung Wan", "Sha Tin", "Kwai Tsing", "Tuen Mun", "Yuen Long", "Ngau Chi Wan", "Tsuen Wan", "Others"];
@@ -40,70 +42,109 @@ const ListOfLocation = () => {
         );
     }, []);
 
-    useEffect(() => {
-        const fetchVenues = async () => {
+    const fetchVenues = async () => {
         try {
-            const response = await fetch('/venues.xml');
-            if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const text = await response.text();
-            const parser = new DOMParser();
-            const xml = parser.parseFromString(text, 'application/xml');
-            const venuesList = Array.from(xml.getElementsByTagName('venue')).map(venue => {
-            const nameEnglish = venue.getElementsByTagName('venuee')[0]?.textContent || 'N/A';
-            // Determine the area based on the venue name
-            const area = Area.find(a => nameEnglish.includes(a)) || 'Others';
-            
-            return {
-                id: venue.getAttribute('id'),
-                nameEnglish,
-                numberOfEvents: 0,
-                area, // Assign the determined area
-                venuelatitude: parseFloat(venue.getElementsByTagName('latitude')[0]?.textContent) || 0,
-                venuelongitude: parseFloat(venue.getElementsByTagName('longitude')[0]?.textContent) || 0
-            };
+            // Fetch all locations
+            const locationsResponse = await axios.get('http://localhost:3000/api/user/location', {
+              withCredentials: true,
             });
-            setVenues(venuesList);
-        } catch (error) {
-            console.error("Loading venues.xml error:", error);
-        }
+      
+            // Fetch user favorites
+            const userFavoritesResponse = await axios.get('http://localhost:3000/api/user/userFavorites', {
+              withCredentials: true,
+            });
+
+            const userFavoritesResData = userFavoritesResponse.data.favLoc;
+            // console.log("userFavoritesResponse.data are ", userFavoritesResData);
+            const userFavorites = userFavoritesResData.map((fav) => fav.locId); // Extract locId array
+            // console.log("userFavorites are ", userFavorites);
+            // Combine locations with favorite status
+            const locationsWithFavorites = locationsResponse.data.map((location) => ({
+              ...location,
+              isFavorite: userFavorites.includes(location.locId), // Determine favorite status
+            }));
+      
+            console.log("Locations with favorites : ", locationsWithFavorites);
+            const venueList = locationsWithFavorites.map((venue) => ({
+                id: venue.locId,
+                nameEnglish: venue.name,
+                numberOfEvents: venue.numEvents,
+                isFavorite: venue.isFavorite,
+                venuelatitude: venue.lat,
+                venuelongitude: venue.long,
+
+              }));
+            setVenues(venueList); // Set the locations state
+          } catch (error) {
+            console.error('Error fetching locations or user favorites:', error);
+          }
         };
+    useEffect(() => {
+    //     const fetchVenues = async () => {
+    //     try {
+    //         const response = await fetch('/venues.xml');
+    //         if (!response.ok) {
+    //         throw new Error(`HTTP error! status: ${response.status}`);
+    //         }
+    //         const text = await response.text();
+    //         const parser = new DOMParser();
+    //         const xml = parser.parseFromString(text, 'application/xml');
+    //         const venuesList = Array.from(xml.getElementsByTagName('venue')).map(venue => {
+    //         const nameEnglish = venue.getElementsByTagName('venuee')[0]?.textContent || 'N/A';
+    //         // Determine the area based on the venue name
+    //         const area = Area.find(a => nameEnglish.includes(a)) || 'Others';
+            
+    //         return {
+    //             id: venue.getAttribute('id'),
+    //             nameEnglish,
+    //             numberOfEvents: 0,
+    //             area, // Assign the determined area
+    //             venuelatitude: parseFloat(venue.getElementsByTagName('latitude')[0]?.textContent) || 0,
+    //             venuelongitude: parseFloat(venue.getElementsByTagName('longitude')[0]?.textContent) || 0
+    //         };
+    //         });
+    //         setVenues(venuesList);
+    //     } catch (error) {
+    //         console.error("Loading venues.xml error:", error);
+    //     }
+    //     };
         fetchVenues();
         console.log("Venues are : ", venues);
+
+
     }, []);
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-        try {
-            const response = await fetch('/events.xml');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const text = await response.text();
-            const parser = new DOMParser();
-            const xml = parser.parseFromString(text, 'application/xml');
-            const eventList = Array.from(xml.getElementsByTagName('event')).map(event => ({
-                id: event.getAttribute('id'),
-                venueid: event.getElementsByTagName('venueid')[0]?.textContent || 'N/A'
-            }));
-            setEvents(eventList);
-            countEvents(eventList);
-        } catch (error) {
-            console.error("Loading events.xml error:", error);
-        }
-        };
-        fetchEvents();
-    }, []);
+    // useEffect(() => {
+    //     const fetchEvents = async () => {
+    //     try {
+    //         const response = await fetch('/events.xml');
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! status: ${response.status}`);
+    //         }
+    //         const text = await response.text();
+    //         const parser = new DOMParser();
+    //         const xml = parser.parseFromString(text, 'application/xml');
+    //         const eventList = Array.from(xml.getElementsByTagName('event')).map(event => ({
+    //             id: event.getAttribute('id'),
+    //             venueid: event.getElementsByTagName('venueid')[0]?.textContent || 'N/A'
+    //         }));
+    //         setEvents(eventList);
+    //         countEvents(eventList);
+    //     } catch (error) {
+    //         console.error("Loading events.xml error:", error);
+    //     }
+    //     };
+    //     fetchEvents();
+    // }, []);
 
-    const countEvents = (eventList) => {
-        setVenues(prevVenues => {
-        return prevVenues.map(venue => {
-            const numberOfEvents = eventList.filter(event => event.venueid === venue.id).length;
-            return { ...venue, numberOfEvents };
-        });
-        });
-    };
+    // const countEvents = (eventList) => {
+    //     setVenues(prevVenues => {
+    //     return prevVenues.map(venue => {
+    //         const numberOfEvents = eventList.filter(event => event.venueid === venue.id).length;
+    //         return { ...venue, numberOfEvents };
+    //     });
+    //     });
+    // };
 
     const haversineDistance = (lat1, lon1, lat2, lon2) => {
         const R = 6371; // Radius of the Earth in km
@@ -184,6 +225,44 @@ const ListOfLocation = () => {
         setCurrentPage(0);
     };
 
+    const changeFavority = async (locId, isFavorite) => {
+        // Logic for changing favorite status
+        try {
+            if (isFavorite) {
+              await apiCsrf.put(
+                '/api/user/removeFavLoc',
+                { favoriteLocationIds: locId },
+                {
+                    headers: {
+                        'Content-Type':'application/json',
+                      },
+                    withCredentials: true 
+                }
+              );
+            } else {
+              await apiCsrf.put(
+                '/api/user/addFavLoc',
+                { favoriteLocationIds: locId },
+                { 
+                    headers: {
+                    'Content-Type':'application/json',
+                    },
+                    withCredentials: true 
+                }
+              );
+            }
+      
+            setVenues((prevVenues) =>
+              prevVenues.map((location) =>
+                location.locId === locId ? { ...location, isFavorite: !isFavorite } : location
+              )
+            );
+            fetchVenues();
+          } catch (error) {
+            console.error('Error toggling favorite status:', error);
+          }
+    };
+
   return (
 <div className="min-h-screen h-full flex items-center bg-gray-100">
   <div className="w-full max-w-5xl px-2">
@@ -254,7 +333,7 @@ const ListOfLocation = () => {
                     </td>
                   </tr>
                 )} 
-                {rowsToShow.map(({ id, nameEnglish, numberOfEvents, venuelongitude, venuelatitude }, index) => {
+                {rowsToShow.map(({ id, isFavorite, nameEnglish, numberOfEvents, venuelongitude, venuelatitude }, index) => {
                   const isLast = index === rowsToShow.length - 1;
                   const classes = isLast ? "p-4" : "p-4 border-b border-gray-200";  // Adjusted border color
                   return (
@@ -272,7 +351,11 @@ const ListOfLocation = () => {
                       </td>
                       <td className={classes}>
                         <Tooltip content="Add to Favourite">
-                          <IconButton variant="text">
+                          <IconButton  onClick={(e)=>{
+                                            e.preventDefault();
+                                            changeFavority(id, isFavorite);
+                                        }}
+                                        variant="text">
                             <PencilIcon className="h-4 w-4 text-gray-800" /> 
                           </IconButton>
                         </Tooltip>
