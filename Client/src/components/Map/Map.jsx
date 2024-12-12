@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
 import mapboxgl from 'mapbox-gl';
@@ -12,6 +12,9 @@ const Map = () => {
     const [venues, setVenues] = useState([]);
     const [userLocation, setUserLocation] = useState({ lng: 114.206, lat: 22.42 });
     const [map, setMap] = useState(null);
+    const mapContainerRef = useRef(null);
+    const mapInstanceRef = useRef(null);
+
     const [userMarker, setUserMarker] = useState(null);
     const [comments, setComments] = useState({
         '36311771': [
@@ -48,7 +51,6 @@ const Map = () => {
 
     const fetchVenues = async () => {
         try {
-            // Fetch all locations
             const locationsResponse = await axios.get('http://localhost:3000/api/user/location', {
                 withCredentials: true,
             });
@@ -69,18 +71,25 @@ const Map = () => {
     };
 
     useEffect(() => {
+        fetchVenues();
+    }, []);
+
+    useEffect(() => {
+        if (mapInstanceRef.current) return;
+
         const queryParams = new URLSearchParams(location.search);
         const lat = parseFloat(queryParams.get('lat'));
         const lng = parseFloat(queryParams.get('lng'));
         const center = lat && lng ? [lng, lat] : [userLocation.lng, userLocation.lat];
-        const mapInstance = new mapboxgl.Map({
-            container: 'map',
+
+        mapInstanceRef.current = new mapboxgl.Map({
+            container: mapContainerRef.current,
             style: 'mapbox://styles/leosinchungho/cm49k8zz801ck01si70os84ez',
             center: center,
             zoom: 13
         });
 
-        setMap(mapInstance);
+        const mapInstance = mapInstanceRef.current;
 
         mapInstance.addControl(new mapboxgl.NavigationControl());
 
@@ -107,13 +116,18 @@ const Map = () => {
 
         return () => {
             if (userMarker) userMarker.remove();
-            mapInstance.remove();
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.remove();
+                mapInstanceRef.current = null;
+            }
         };
     }, [userLocation.lng, userLocation.lat, location.search]);
 
     useEffect(() => {
+        const map = mapInstanceRef.current;
         if (!map) return;
-        
+
+        console.log('Current venues:', venues);
         venues.forEach((venue) => {
             const marker = new mapboxgl.Marker({ color: 'red' })
                 .setLngLat([venue.venuelongitude, venue.venuelatitude])
@@ -131,7 +145,7 @@ const Map = () => {
             setSelectedVenue(venues[0]);
             map.flyTo({ center: [venues[0].venuelongitude, venues[0].venuelatitude], zoom: 14 });
         }
-    }, [map, venues, location.search]);
+    }, [venues, location.search]);
 
     const handleAddComment = (venueId, comment) => {
         if (!comment.trim()) return;
@@ -154,7 +168,7 @@ const Map = () => {
 
     return (
         <div className='relative w-full h-screen'>
-            <div id="map" className='w-full h-full' />
+            <div id="map" ref={mapContainerRef} className='w-full h-full' />
 
             {selectedVenue && (
                 <div className="absolute top-0 left-0 h-full w-80 bg-white shadow-lg z-20 overflow-y-auto p-6 transition-transform transform duration-300 ease-in-out">
