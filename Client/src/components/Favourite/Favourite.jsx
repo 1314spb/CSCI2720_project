@@ -12,10 +12,11 @@ import {
   CardFooter,
   IconButton,
   Tooltip,
+  Input,
 } from "@material-tailwind/react";
+import apiCsrf from '../../../apiCsrf';
 
-// 表头定义
-const TABLE_HEAD = ["Location", "Number of Events", "Edit"];
+const TABLE_HEAD = ["Location", "Number of Events", "Remove"];
 
 const SortableTable = () => {
   const [venues, setVenues] = useState([]);
@@ -46,8 +47,8 @@ const SortableTable = () => {
       const lowerSearch = searchTerm.toLowerCase();
       data = data.filter(
         (row) =>
-          row.location.toLowerCase().includes(lowerSearch) ||
-          row.level.toLowerCase().includes(lowerSearch)
+          row.location.toLowerCase().includes(lowerSearch)
+
       );
     }
 
@@ -71,33 +72,91 @@ const SortableTable = () => {
   const totalPages = Math.ceil(sortedData.length / rowsPerPage);
   const displayedData = sortedData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
-  useEffect(() => {
-    const fetchVenues = async () => {
-      try {
-        const response = await axios.get('http://localhost:5173/venues.xml', {
-          responseType: 'text',
-        });
+  const fetchVenues = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/user/userFavorites', {
+        headers: {
+          'Content-Type':'application/json',
+        },
+        withCredentials: true, // Include HTTP-only cookies in the request
+      });
 
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(response.data, "text/xml");
-        const venueNodes = xmlDoc.getElementsByTagName("venue");
+      // console.log('Response is : ', favLoc);
 
-        const venueList = Array.from(venueNodes).map((venue) => ({
-          location: venue.getElementsByTagName("venuee")[0].textContent,
-          number_of_events: Math.floor(Math.random() * 100),
-        }));
-        setVenues(venueList);
-      } catch (error) {
-        console.error("Error fetching venues:", error);
+      const favLoc = response.data.favLoc;
+      console.log('Response is : ', favLoc);
+      if(!Array.isArray(favLoc)){
+        throw new Error('Invalid response format');
       }
-    };
+      const venueList = favLoc.map((venue) => ({
+        locId: venue.locId,
+        location: venue.name,
+        number_of_events: venue.numEvents,
+      }));
+      console.log(venueList);
+      setVenues(venueList);
+    } catch (error) {
+      console.error("Error fetching venues:", error);
+    }
+  };
 
-    fetchVenues();
-  }, []);
+  const removeFavLoc = async (locId) => {
+    try {
+      const response = await apiCsrf.put('/api/user/removeFavLoc', 
+        { favoriteLocationIds: locId},
+        {
+        headers: {
+          'Content-Type':'application/json',
+        },
+        withCredentials: true, // Include HTTP-only cookies in the request
+      });
+
+      console.log('Response is : ', response.data);
+      fetchVenues();
+    } catch (error) {
+      console.error("Error deleting favorite location:", error);
+    }
+  };
+  useEffect(() => {
+    // const fetchVenues = async () => {
+    //   try {
+    //     const response = await axios.get('http://localhost:5173/venues.xml', {
+    //       responseType: 'text',
+    //     });
+
+    //     const parser = new DOMParser();
+    //     const xmlDoc = parser.parseFromString(response.data, "text/xml");
+    //     const venueNodes = xmlDoc.getElementsByTagName("venue");
+
+    //     const venueList = Array.from(venueNodes).map((venue) => ({
+    //       location: venue.getElementsByTagName("venuee")[0].textContent,
+    //       number_of_events: Math.floor(Math.random() * 100),
+    //     }));
+    //     setVenues(venueList);
+    //   } catch (error) {
+    //     console.error("Error fetching venues:", error);
+    //   }
+    // };
+
+    // fetchVenues();
+
+  fetchVenues();
+}
+  , []);
 
   return (
     <Card className="h-full w-full">
       <CardBody className="overflow-scroll px-0">
+        <div className="mb-4">
+          <Input
+            type="text"
+            placeholder="Search by location"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="flex w-64"
+          />
+        </div>
+
         <table className="mt-4 w-full min-w-max table-auto text-left">
           <thead>
             <tr>
@@ -132,7 +191,7 @@ const SortableTable = () => {
               </tr>
             )}
             {displayedData.map(
-              ({ location, number_of_events }, index) => {
+              ({ locId, location, number_of_events }, index) => {
                 const isLast = index === displayedData.length - 1;
                 const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
                 return (
@@ -148,8 +207,12 @@ const SortableTable = () => {
                     </td>
 
                     <td className={classes}>
-                      <Tooltip content="Edit User">
-                        <IconButton variant="text">
+                      <Tooltip content="Remove">
+                        <IconButton variant="text" 
+                            onClick={(e)=>{
+                              e.preventDefault();
+                              removeFavLoc(locId)
+                            }}>
                           <PencilIcon className="h-4 w-4" />
                         </IconButton>
                       </Tooltip>

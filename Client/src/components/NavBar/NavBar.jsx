@@ -1,26 +1,66 @@
 import React, { useState, useEffect, useRef } from 'react';
+import fetchUserData from '../../../fetchUserData';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+import apiCsrf from '../../../apiCsrf';
 
 const NavBar = () => {
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [isMenuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  const handleLogout = async () => {
+    try{
+      await apiCsrf.post(
+        '/api/auth/logout',{},
+        { withCredentials: true }
+      );
+      console.log('User log out successfully');
+      Cookies.remove('username');
+      setUser(null);
+      setError('');
+      navigate('/login');
+    }catch(error){
+      console.log('Error during logout', error);
+    }
+  }
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
+  };
+
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
   };
 
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setDropdownOpen(false);
     }
+    if (isMenuOpen && dropdownRef.current && dropdownRef.current.contains(event.target)) {
+      setMenuOpen(false);
+    }
   };
 
+
   useEffect(() => {
+    fetchUserData(setUser, setError);
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  if(error){
+    return <div>{error}</div>
+  }
+  if(!user){
+    return <div>Loading...</div>
+  }
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900 w-full fixed z-50 opacity-85 top-0 left-0 right-0">
@@ -47,21 +87,29 @@ const NavBar = () => {
           {isDropdownOpen && (
             <div className="absolute right-0 z-50 my-2 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 mt-72">
               <div className="px-4 py-3">
-                <span className="block text-sm text-gray-900 dark:text-white select-none">Jane Cooper</span>
-                <span className="block text-sm text-gray-500 truncate dark:text-gray-400 select-none">jane.cooper@example.com</span>
+                <span className="block text-sm text-gray-900 dark:text-white select-none">{user.user.username}</span>
+                <span className="block text-sm text-gray-500 truncate dark:text-gray-400 select-none">{user.user.email}</span>
               </div>
               <ul className="py-2" aria-labelledby="user-menu-button">
+              {user.user?.admin && (
+                <>
                 <li>
                   <a href="/usersmanager" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">User Manager</a>
                 </li>
                 <li>
-                  <a href="/locationmanager" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Location Manager</a>
+                  <a href="/eventsmanager" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Event Manager</a>
+                </li>
+                </>
+                ) }
+                <li>
+                  <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Profile</a>
                 </li>
                 <li>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Settings</a>
-                </li>
-                <li>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a>
+                  
+                  <a href="#" onClick={()=>{handleLogout()}} 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                      Sign out
+                          </a>
                 </li>
               </ul>
             </div>
@@ -71,6 +119,7 @@ const NavBar = () => {
             data-collapse-toggle="navbar-user"
             type="button"
             className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+            onClick={toggleMenu}
             aria-controls="navbar-user"
             aria-expanded="false"
           >
@@ -81,7 +130,7 @@ const NavBar = () => {
           </button>
         </div>
 
-        <div className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-user">
+        <div className={`items-center justify-between w-full md:flex md:w-auto md:order-1 ${isMenuOpen ? 'block' : 'hidden'}`} id="navbar-user"> {/* 根据状态控制显示 */}
           <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
             <li>
               <a href="/" className="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500" aria-current="page">Home</a>
