@@ -44,6 +44,7 @@ function Main() {
               <Route path="usersmanager" element={<UsersManager />} />
               <Route path="eventsmanager" element={<EventsManager />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="no_idea" element={<No_Idea />} />
             </Route>
           </Routes>
         </main>
