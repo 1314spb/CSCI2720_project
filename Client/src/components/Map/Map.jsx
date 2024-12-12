@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { useLocation } from 'react-router-dom';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibGVvc2luY2h1bmdobyIsImEiOiJjbTQ5aHpsOXUwYXpoMm1xNDNjaHo0dmhuIn0.vLLeV55pFPR44rZedmbLgw';
 
 const Map = () => {
+    const location = useLocation();
     const [venues, setVenues] = useState([]);
     const [userLocation, setUserLocation] = useState({ lng: 114.206, lat: 22.42 });
     const [map, setMap] = useState(null);
@@ -82,10 +84,14 @@ const Map = () => {
     }, []);
 
     useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const lat = parseFloat(queryParams.get('lat'));
+        const lng = parseFloat(queryParams.get('lng'));
+        const center = lat && lng ? [lng, lat] : [userLocation.lng, userLocation.lat];
         const mapInstance = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/leosinchungho/cm49k8zz801ck01si70os84ez',
-            center: [userLocation.lng, userLocation.lat],
+            center: center,
             zoom: 13
         });
 
@@ -118,7 +124,7 @@ const Map = () => {
             if (userMarker) userMarker.remove();
             mapInstance.remove();
         };
-    }, [userLocation.lng, userLocation.lat]);
+    }, [userLocation.lng, userLocation.lat, location.search]);
 
     useEffect(() => {
         if (!map) return;
@@ -133,7 +139,14 @@ const Map = () => {
                 map.flyTo({ center: [venue.longitude, venue.latitude], zoom: 14 });
             });
         });
-    }, [map, venues]);
+        const queryParams = new URLSearchParams(location.search);
+        const triggercommentarea = queryParams.get('status') === 'true';
+        
+        if (triggercommentarea && venues.length > 0) {
+            setSelectedVenue(venues[0]); // Automatically select the first venue
+            map.flyTo({ center: [venues[0].longitude, venues[0].latitude], zoom: 14 });
+        }
+    }, [map, venues, location.search]);
 
     const handleAddComment = (venueId, comment) => {
         if (!comment.trim()) return;
