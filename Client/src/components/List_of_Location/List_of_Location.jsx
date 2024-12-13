@@ -80,71 +80,11 @@ const ListOfLocation = () => {
     }
   };
   useEffect(() => {
-    //     const fetchVenues = async () => {
-    //     try {
-    //         const response = await fetch('/venues.xml');
-    //         if (!response.ok) {
-    //         throw new Error(`HTTP error! status: ${response.status}`);
-    //         }
-    //         const text = await response.text();
-    //         const parser = new DOMParser();
-    //         const xml = parser.parseFromString(text, 'application/xml');
-    //         const venuesList = Array.from(xml.getElementsByTagName('venue')).map(venue => {
-    //         const nameEnglish = venue.getElementsByTagName('venuee')[0]?.textContent || 'N/A';
-    //         // Determine the area based on the venue name
-    //         const area = Area.find(a => nameEnglish.includes(a)) || 'Others';
-
-    //         return {
-    //             id: venue.getAttribute('id'),
-    //             nameEnglish,
-    //             numberOfEvents: 0,
-    //             area, // Assign the determined area
-    //             venuelatitude: parseFloat(venue.getElementsByTagName('latitude')[0]?.textContent) || 0,
-    //             venuelongitude: parseFloat(venue.getElementsByTagName('longitude')[0]?.textContent) || 0
-    //         };
-    //         });
-    //         setVenues(venuesList);
-    //     } catch (error) {
-    //         console.error("Loading venues.xml error:", error);
-    //     }
-    //     };
     fetchVenues();
     console.log("Venues are : ", venues);
 
 
   }, []);
-
-  // useEffect(() => {
-  //     const fetchEvents = async () => {
-  //     try {
-  //         const response = await fetch('/events.xml');
-  //         if (!response.ok) {
-  //             throw new Error(`HTTP error! status: ${response.status}`);
-  //         }
-  //         const text = await response.text();
-  //         const parser = new DOMParser();
-  //         const xml = parser.parseFromString(text, 'application/xml');
-  //         const eventList = Array.from(xml.getElementsByTagName('event')).map(event => ({
-  //             id: event.getAttribute('id'),
-  //             venueid: event.getElementsByTagName('venueid')[0]?.textContent || 'N/A'
-  //         }));
-  //         setEvents(eventList);
-  //         countEvents(eventList);
-  //     } catch (error) {
-  //         console.error("Loading events.xml error:", error);
-  //     }
-  //     };
-  //     fetchEvents();
-  // }, []);
-
-  // const countEvents = (eventList) => {
-  //     setVenues(prevVenues => {
-  //     return prevVenues.map(venue => {
-  //         const numberOfEvents = eventList.filter(event => event.venueid === venue.id).length;
-  //         return { ...venue, numberOfEvents };
-  //     });
-  //     });
-  // };
 
   const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // Radius of the Earth in km

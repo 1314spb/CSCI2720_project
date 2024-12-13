@@ -118,28 +118,6 @@ const SortableTable = () => {
     }
   };
   useEffect(() => {
-    // const fetchVenues = async () => {
-    //   try {
-    //     const response = await axios.get('http://localhost:5173/venues.xml', {
-    //       responseType: 'text',
-    //     });
-
-    //     const parser = new DOMParser();
-    //     const xmlDoc = parser.parseFromString(response.data, "text/xml");
-    //     const venueNodes = xmlDoc.getElementsByTagName("venue");
-
-    //     const venueList = Array.from(venueNodes).map((venue) => ({
-    //       location: venue.getElementsByTagName("venuee")[0].textContent,
-    //       number_of_events: Math.floor(Math.random() * 100),
-    //     }));
-    //     setVenues(venueList);
-    //   } catch (error) {
-    //     console.error("Error fetching venues:", error);
-    //   }
-    // };
-
-    // fetchVenues();
-
   fetchVenues();
 }
   , []);

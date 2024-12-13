@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import apiCsrf from '../../../apiCsrf';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useLocation } from 'react-router-dom';
@@ -33,19 +33,6 @@ const Map = () => {
     const [selectedVenue, setSelectedVenue] = useState(null);
     const [favorites, setFavorites] = useState([]);
 
-    useEffect(() => {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { longitude, latitude } = position.coords;
-                setUserLocation({ lng: longitude, lat: latitude });
-            },
-            (error) => {
-                console.error("Error fetching location: ", error);
-                setUserLocation({ lng: 114.206, lat: 22.42 });
-            }
-        );
-    }, []);
-
     const fetchVenues = async () => {
         try {
             // Fetch all locations
@@ -69,43 +56,46 @@ const Map = () => {
     };
 
     useEffect(() => {
-        // const fetchVenues = async () => {
-        //     try {
-        //         const response = await fetch('/venues.xml');
-        //         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        //         const text = await response.text();
-        //         const parser = new DOMParser();
-        //         const xmlDoc = parser.parseFromString(text, "application/xml");
-        //         const venueNodes = xmlDoc.getElementsByTagName('venue');
-        //         const venuesArray = [];
-
-        //         for (let i = 0; i < venueNodes.length; i++) {
-        //             const venue = venueNodes[i];
-        //             const id = venue.getAttribute('id');
-        //             const nameC = venue.getElementsByTagName('venuec')[0]?.textContent || '';
-        //             const nameE = venue.getElementsByTagName('venuee')[0]?.textContent || '';
-        //             const latitude = venue.getElementsByTagName('latitude')[0]?.textContent;
-        //             const longitude = venue.getElementsByTagName('longitude')[0]?.textContent;
-
-        //             if (latitude && longitude) {
-        //                 venuesArray.push({
-        //                     id,
-        //                     nameC,
-        //                     nameE,
-        //                     latitude: parseFloat(latitude),
-        //                     longitude: parseFloat(longitude)
-        //                 });
-        //             }
-        //         }
-
-        //         setVenues(venuesArray);
-        //     } catch (error) {
-        //         console.error("Error loading venues.xml: ", error);
-        //     }
-        // };
-
         fetchVenues();
     }, []);
+    
+    const changeFavority = async (locId, isFavorite) => {
+        // Logic for changing favorite status
+        try {
+          if (isFavorite) {
+            await apiCsrf.put(
+              '/api/user/removeFavLoc',
+              { favoriteLocationIds: locId },
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                withCredentials: true
+              }
+            );
+          } else {
+            await apiCsrf.put(
+              '/api/user/addFavLoc',
+              { favoriteLocationIds: locId },
+              {
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                withCredentials: true
+              }
+            );
+          }
+    
+          setVenues((prevVenues) =>
+            prevVenues.map((location) =>
+              location.locId === locId ? { ...location, isFavorite: !isFavorite } : location
+            )
+          );
+        //   fetchVenues();
+        } catch (error) {
+          console.error('Error toggling favorite status:', error);
+        }
+      };
 
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
@@ -181,15 +171,15 @@ const Map = () => {
         }));
     };
 
-    const handleToggleFavorite = (venueId) => {
-        setFavorites(prevFavorites => {
-            if (prevFavorites.includes(venueId)) {
-                return prevFavorites.filter(id => id !== venueId);
-            } else {
-                return [...prevFavorites, venueId];
-            }
-        });
-    };
+    // const handleToggleFavorite = (venueId) => {
+    //     setFavorites(prevFavorites => {
+    //         if (prevFavorites.includes(venueId)) {
+    //             return prevFavorites.filter(id => id !== venueId);
+    //         } else {
+    //             return [...prevFavorites, venueId];
+    //         }
+    //     });
+    // };
 
     return (
         <div className='relative w-full h-screen'>
@@ -238,7 +228,7 @@ const Map = () => {
                         </button>
                     </form>
                     <button
-                        onClick={() => handleToggleFavorite(selectedVenue.id)}
+                        onClick={() => changeFavority(venues.id, venues.isFavorite)}
                         className={`mt-4 px-4 py-2 rounded transition-colors flex ${favorites.includes(selectedVenue.id)
                             ? 'bg-red-500 hover:bg-red-600'
                             : 'bg-yellow-500 hover:bg-yellow-600'
