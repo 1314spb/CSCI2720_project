@@ -1,21 +1,50 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from 'axios';
+import bcrypt from 'bcryptjs';
+import apiCsrf from '../../../apiCsrf';
 
 const Profile = () => {
     const [fullName, setFullName] = useState("Jane Ferguson");
     const [email, setEmail] = useState("helloworld@gmail.com");
-    const [password, setPassword] = useState("password");
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+    const [password, setPassword] = useState('');
+    const [enteredPassword, setEnteredPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
-    const handleSubmit = (e) => {
+    useEffect(() => {
+        const fetchProfileInfo = async () => {
+            console.log("fetchProfileInfo is running");
+            try {
+              const response = await axios.get('http://localhost:3000/api/user/getPersonalInfo', {
+                withCredentials: true, // Include HTTP-only cookies in the request
+              });
+
+              const user = response.data.user;
+              setFullName(user.username);
+              setEmail(user.email);
+              setPassword(user.password);
+            } catch (error) {
+              console.error('Error fetching user data:', error);
+            }
+          };
+        fetchProfileInfo();
+    }, []);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (newPassword.length != 0) {
+            const isMatch = await bcrypt.compare(enteredPassword, password);
+            if (!isMatch) {
+                alert("Incorrect current password");
+                return;
+            }
+
             if (newPassword !== confirmPassword) {
                 alert("New passwords do not match!");
                 return;
             }
 
-            if (password === newPassword) {
+            if (enteredPassword === newPassword) {
                 alert("New password must be different from the current password!");
                 return;
             }
@@ -32,6 +61,23 @@ const Profile = () => {
         }
 
         console.log({ fullName, email, newPassword });
+
+        const fetchEditInfo = async () => {
+            console.log('fetchEditInfo is runnning');
+            const response = await apiCsrf.put('/api/user/editPersonalInfo', 
+                {
+                    username: fullName,
+                    password: newPassword
+                },
+                {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true
+                });
+            console.log(response.data);
+        }
+        fetchEditInfo();
     };
 
     return (
@@ -76,15 +122,14 @@ const Profile = () => {
                         </div>
 
                         <div className="mb-6">
+                            <p className="mb-2 text-base font-semibold text-indigo-700 dark:text-white">Enter current password to change password</p>
                             <label htmlFor="password" className="block mb-2 text-sm font-medium text-indigo-900 dark:text-white">Current Password</label>
                             <input
                                 type="password"
                                 id="password"
                                 className="bg-indigo-50 border border-indigo-300 text-indigo-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5"
                                 placeholder="Current password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
+                                onChange={(e) => setEnteredPassword(e.target.value)}
                             />
                         </div>
 
@@ -95,9 +140,7 @@ const Profile = () => {
                                 id="new_password"
                                 className="bg-indigo-50 border border-indigo-300 text-indigo-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5"
                                 placeholder="New password"
-                                value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                required
                             />
                         </div>
 
@@ -108,9 +151,7 @@ const Profile = () => {
                                 id="confirm_password"
                                 className="bg-indigo-50 border border-indigo-300 text-indigo-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5"
                                 placeholder="Confirm new password"
-                                value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
                             />
                         </div>
 

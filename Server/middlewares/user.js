@@ -6,11 +6,12 @@ const User = require('../models/User');
 const Location = require('../models/Location');
 const Event = require('../models/Event');
 const authenticateUser = require('./authCheck');
+const bcrypt = require('bcrypt');
 
 // GET http://server-address/api/user/getPersonalInfo
 router.get('/getPersonalInfo', authenticateUser ,async (req, res) => {
     try {
-        console.log("getPersonalInfo is running");
+        console.log("getPersonalInfo request received");
         // console.log("User ID need to find is ",req.user.userId);
         const {userId} = req.user;
         const user = await User.findOne({userId});
@@ -22,6 +23,7 @@ router.get('/getPersonalInfo', authenticateUser ,async (req, res) => {
           user: {
             userId: user.userId,
             username: user.username,
+            password: user.password,
             email: user.email,
             admin: user.admin,
             favLoc: user.favLoc, // Assuming this is an array of location IDs
@@ -44,9 +46,12 @@ router.put('/editPersonalInfo', authenticateUser, async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const updatedUser = await User.findByIdAndUpdate(
             user,
+            password?
             { 
                 username: username,
                 password: hashedPassword
+            }:{
+                username: username
             },
             { new: true }
         )
