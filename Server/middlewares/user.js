@@ -125,6 +125,7 @@ router.get('/userFavorites', authenticateUser , async (req, res) => {
 
 // PUT http://server-address/api/user/addFavLoc
 router.put('/addFavLoc',authenticateUser, async (req, res) => {
+    console.log("addFavLoc running");
     try {
         const {userId} = req.user;
         const user = await User.findOne({userId});
@@ -157,6 +158,7 @@ router.put('/addFavLoc',authenticateUser, async (req, res) => {
 
 // PUT http://server-address/api/user/removeFavLoc
 router.put('/removeFavLoc', authenticateUser, async (req, res) => {
+    console.log("removeFavLoc running");
     try {
         const {userId} = req.user;
         const user = await User.findOne({userId});

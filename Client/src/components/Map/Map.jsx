@@ -37,20 +37,37 @@ const Map = () => {
     const [favorites, setFavorites] = useState([]);
 
     const fetchVenues = async () => {
+        console.log("fetchVenues called");
         try {
             const locationsResponse = await axios.get('http://localhost:3000/api/user/location', {
                 withCredentials: true,
             });
 
-            const venueList = locationsResponse.data.map((venue) => ({
+            const userFavoritesResponse = await axios.get('http://localhost:3000/api/user/userFavorites', {
+                withCredentials: true,
+            });
+
+            const userFavoritesResData = userFavoritesResponse.data.favLoc;
+            // console.log("userFavoritesResponse.data are ", userFavoritesResData);
+            const userFavorites = userFavoritesResData.map((fav) => fav.locId); // Extract locId array
+            console.log("userFavorites are ", userFavorites);
+            console.log("locationResponse is: ", locationsResponse.data);
+            // Combine locations with favorite status
+            const locationsWithFavorites = locationsResponse.data.map((location) => ({
+              ...location,
+              isFavorite: userFavorites.includes(location.locId), // Determine favorite status
+            }));
+
+            const venueList = locationsWithFavorites.map((venue) => ({
                 id: venue.locId,
                 nameEnglish: venue.name,
                 numberOfEvents: venue.numEvents,
                 venuelatitude: parseFloat(venue.lat),
                 venuelongitude: parseFloat(venue.long),
+                isFavorite: venue.isFavorite,
 
             }));
-
+            console.log('Updated venues:', venueList);
             setVenues(venueList);
         } catch (error) {
             console.error('Error fetching locations or user favorites:', error);
@@ -61,9 +78,20 @@ const Map = () => {
         fetchVenues();
     }, []);
     
+    const handleToggleFavorite = (venueId) => {
+        setFavorites(prevFavorites => {
+            if (prevFavorites.includes(venueId)) {
+                return prevFavorites.filter(id => id !== venueId);
+            } else {
+                return [...prevFavorites, venueId];
+            }
+        });
+    };
+
     const changeFavority = async (locId, isFavorite) => {
-        // Logic for changing favorite status
+        console.log(`Changing favorite status for locId: ${locId}, isFavorite: ${isFavorite}`);
         try {
+
           if (isFavorite) {
             await apiCsrf.put(
               '/api/user/removeFavLoc',
@@ -88,12 +116,16 @@ const Map = () => {
             );
           }
     
-          setVenues((prevVenues) =>
-            prevVenues.map((location) =>
-              location.locId === locId ? { ...location, isFavorite: !isFavorite } : location
-            )
-          );
-        //   fetchVenues();
+        setVenues((prevVenues) =>
+            prevVenues.map((venue) =>
+              venue.id === locId
+                  ? { ...venue, isFavorite: !isFavorite }
+                  : venue
+          )
+        );
+        await fetchVenues();
+        console.log('Favorite status toggled successfully and venues reloaded.');
+        
         } catch (error) {
           console.error('Error toggling favorite status:', error);
         }
@@ -170,6 +202,14 @@ const Map = () => {
             setSelectedVenue(venues[0]);
             map.flyTo({ center: [venues[0].venuelongitude, venues[0].venuelatitude], zoom: 14 });
         }
+    // Ensure selectedVenue reflects the latest changes in venues
+        if (selectedVenue) {
+            const updatedVenue = venues.find((venue) => venue.id === selectedVenue.id);
+            if (updatedVenue) {
+                setSelectedVenue(updatedVenue);
+            }
+            }       
+        console.log("selectedVenues is: ", selectedVenue);
     }, [venues, location.search]);
 
     const handleAddComment = (venueId, comment) => {
@@ -181,15 +221,6 @@ const Map = () => {
         }));
     };
 
-    // const handleToggleFavorite = (venueId) => {
-    //     setFavorites(prevFavorites => {
-    //         if (prevFavorites.includes(venueId)) {
-    //             return prevFavorites.filter(id => id !== venueId);
-    //         } else {
-    //             return [...prevFavorites, venueId];
-    //         }
-    //     });
-    // };
 
     return (
         <div className='relative w-full h-screen'>
@@ -238,13 +269,15 @@ const Map = () => {
                         </button>
                     </form>
                     <button
-                        onClick={() => changeFavority(venues.id, venues.isFavorite)}
-                        className={`mt-4 px-4 py-2 rounded transition-colors flex ${favorites.includes(selectedVenue.id)
-                            ? 'bg-red-500 hover:bg-red-600'
-                            : 'bg-yellow-500 hover:bg-yellow-600'
+                        onClick={(e) => {
+                            e.preventDefault();
+                            changeFavority(selectedVenue.id, selectedVenue.isFavorite);}}
+                        className={`mt-4 px-4 py-2 rounded transition-colors flex ${selectedVenue.isFavorite
+                            ? ('bg-red-500 hover:bg-red-600')
+                            : ('bg-yellow-500 hover:bg-yellow-600')
                             } text-white`}
                     >
-                        {favorites.includes(selectedVenue.id) ? 'Remove from favourite' : 'Add into favourite'}
+                        {selectedVenue.isFavorite ? 'Remove from favourite' : 'Add into favourite'}
                     </button>
                 </div>
             )}
