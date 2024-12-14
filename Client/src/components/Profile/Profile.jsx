@@ -62,8 +62,8 @@ const Profile = () => {
 
         console.log({ fullName, email, newPassword });
 
-        const fetchEditInfo = async () => {
-            console.log('fetchEditInfo is runnning');
+        const saveEditInfo = async () => {
+            console.log('saveEditInfo is runnning');
             const response = await apiCsrf.put('/api/user/editPersonalInfo', 
                 {
                     username: fullName,
@@ -77,7 +77,7 @@ const Profile = () => {
                 });
             console.log(response.data);
         }
-        fetchEditInfo();
+        saveEditInfo();
     };
 
     return (

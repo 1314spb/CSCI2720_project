@@ -5,6 +5,27 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Event = require('../models/Event');
 const authenticateUser = require('./authCheck');
+const bcrypt = require('bcrypt');
+
+// GET http://server-address/api/admin/userlist
+router.get('/userlist', authenticateUser, (req, res) => {
+    console.log("User list fetching request got");
+    User.find({})
+    .then((users) => {
+        const userlist = users.map(user => {
+            const { password, ...userWithoutPassword } = user.toObject(); // Convert to plain object
+            return userWithoutPassword; // Return the user object without the password
+        });
+        res.send(userlist);
+    })
+    .catch((err) => {
+        console.log('Failed to read from User');
+        console.log(err);
+        res.status(500).json({
+            message: 'failed'
+        })
+    })
+})
 
 // POST http://server-address/api/admin/createuser
 router.post('/createuser', authenticateUser, async (req, res) => {
@@ -44,16 +65,13 @@ router.post('/createuser', authenticateUser, async (req, res) => {
 router.put('/editPersonalInfo', authenticateUser, async (req, res) => {
     console.log('Edit personal info request received');
     try {
-        const {userId} = req.user;
+        const { userId, username, admin } = req.body;
         const user = await User.findOne({userId});
         console.log("User found : ", user);
-        const { username, password, admin } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
         const updatedUser = await User.findByIdAndUpdate(
             user,
             { 
                 username: username,
-                password: hashedPassword,
                 admin: admin
             },
             { new: true }

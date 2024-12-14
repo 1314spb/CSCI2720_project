@@ -82,7 +82,7 @@ router.get('/location',authenticateUser  ,(req, res) => {
     .catch((err) => {
         console.log('Failed to read from Location');
         console.log(err);
-        res.status(404).json({
+        res.status(500).json({
             message: 'failed'
         })
     })
@@ -98,7 +98,7 @@ router.get('/event',authenticateUser, (req, res) => {
     .catch((err) => {
         console.log('Failed to read from Event');
         console.log(err);
-        res.status(404).json({
+        res.status(500).json({
             message: 'failed'
         })
     })
