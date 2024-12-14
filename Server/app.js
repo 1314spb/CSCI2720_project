@@ -116,6 +116,8 @@ db.once('open', async () => {
                                 venue: venue,
                                 locId: parseInt(locId),
                                 price: event.pricee[0],
+                                duration: event.progtimee[0],
+                                agelimit: event.agelimite[0],
                             }))
                     })
                     // Save into database
@@ -129,6 +131,8 @@ db.once('open', async () => {
                             venue: event.venue,
                             locId: event.locId,
                             price: event.price,
+                            duration: event.duration,
+                            agelimit: event.agelimite,
                         })
                         await newEvent.save()
                         .then(() => {
