@@ -31,6 +31,12 @@ const EventSchema = mongoose.Schema({
     },
     price: {
         type: String,
+    },
+    duration: {
+        type: String,
+    },
+    agelimit: {
+        type: String,
     }
 })
 

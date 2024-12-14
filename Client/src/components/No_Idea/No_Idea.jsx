@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const NoIdea = () => {
     const [venues, setVenues] = useState([]);
@@ -7,60 +8,58 @@ const NoIdea = () => {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [selectedVenue, setSelectedVenue] = useState(null);
 
+    const fetchVenues = async () => {
+        try {
+          // Fetch all locations
+          const locationsResponse = await axios.get('http://localhost:3000/api/user/location', {
+            withCredentials: true,
+          });
+          
+          console.log("LocationResponse: ", locationsResponse.data);
+          const venueList = locationsResponse.data.map((venue) => ({
+            id: venue.locId,
+            nameEnglish: venue.name,
+            venuelatitude: venue.lat,
+            venuelongitude: venue.long,
+    
+          }));
+          setVenues(venueList); 
+        } catch (error) {
+          console.error('Error fetching locations or user favorites:', error);
+        }
+      };
     useEffect(() => {
-        const fetchVenues = async () => {
-            try {
-                const response = await fetch('/venues.xml');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const text = await response.text();
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(text, 'application/xml');
-                const venuesList = Array.from(xml.getElementsByTagName('venue')).map(venue => {
-                    const nameEnglish = venue.getElementsByTagName('venuee')[0]?.textContent || 'N/A';
-                    return {
-                        id: venue.getAttribute('id'),
-                        nameEnglish,
-                        venuelatitude: parseFloat(venue.getElementsByTagName('latitude')[0]?.textContent) || 0,
-                        venuelongitude: parseFloat(venue.getElementsByTagName('longitude')[0]?.textContent) || 0
-                    };
-                });
-                setVenues(venuesList);
-            } catch (error) {
-                console.error("Loading venues.xml error:", error);
-            }
-        };
         fetchVenues();
     }, []);
 
     useEffect(() => {
         const fetchEvents = async () => {
-            try {
-                const response = await fetch('/events.xml');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const text = await response.text();
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(text, 'application/xml');
-                const eventList = Array.from(xml.getElementsByTagName('event')).map(event => ({
-                    id: event.getAttribute('id'),
-                    venueid: event.getElementsByTagName('venueid')[0]?.textContent || 'N/A',
-                    title: event.getElementsByTagName('titlee')[0]?.textContent || 'N/A',
-                    date: event.getElementsByTagName('predateE')[0]?.textContent || 'N/A',
-                    duration: event.getElementsByTagName('progtimee')[0]?.textContent || 'N/A',
-                    agelimit: event.getElementsByTagName('agelimite')[0]?.textContent || 'N/A',
-                    price: event.getElementsByTagName('pricee')[0]?.textContent || 'N/A',
-                    description: event.getElementsByTagName('desce')[0]?.textContent || 'N/A'
-                }));
-                setEvents(eventList);
-            } catch (error) {
-                console.error("Loading events.xml error:", error);
-            }
-        };
+        try {
+        const eventsResponse = await axios.get('http://localhost:3000/api/user/event', {
+            withCredentials: true,
+          });
+        
+            console.log(eventsResponse.data);
+            const allEvents = eventsResponse.data;
+            const eventList = allEvents.map(event => ({
+                    id: event.eventId,
+                    title: event.title || 'N/A',
+                    venueid: event.locId || 'N/A',
+                    date: event.datetime || 'N/A',
+                    price: event.price|| 'N/A',
+                    description: event.description|| 'N/A',
+                    duration: event.duration|| 'N/A',
+                    agelimit: event.agelimit|| 'N/A',
+            }))
+            setEvents(eventList);
+        }catch(error){
+            console.error('Error fetching events:', error);
+        }
+        }
+        
         fetchEvents();
     }, []);
+
 
     const getRandomEvent = () => {
         if (events.length > 0 && venues.length > 0) {
