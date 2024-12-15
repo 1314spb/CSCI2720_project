@@ -28,6 +28,7 @@ const ListOfLocation = () => {
   const [userLocation, setUserLocation] = useState({ lng: 114.206, lat: 22.42 });
   const [maxDistance, setMaxDistance] = useState(50);
   const [isSliding, setIsSliding] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState("");
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -70,6 +71,11 @@ const ListOfLocation = () => {
         area: null
       }));
       setVenues(venueList);
+
+      if (locationsResponse.data.length > 0) {
+        const updatedTime = new Date().toLocaleString();
+        setLastUpdated(updatedTime);
+      }
     } catch (error) {
       console.error('Error fetching locations or user favorites:', error);
     }
@@ -330,7 +336,7 @@ const ListOfLocation = () => {
               Page {currentPage + 1} of {totalFilteredPages}
             </Typography>
             <Typography variant="small" color="gray" className="font-normal select-none">
-              Last updated time: {}
+              Last updated time: {lastUpdated}
             </Typography>
           </CardFooter>
         </Card>

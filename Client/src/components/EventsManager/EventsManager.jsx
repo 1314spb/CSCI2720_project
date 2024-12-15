@@ -30,7 +30,7 @@ const EventsManager = () => {
         setEvents(response.data);
 
         if (response.data.length > 0) {
-          const updatedTime = new Date().toLocaleString(); // You can format this as needed
+          const updatedTime = new Date().toLocaleString();
           setLastUpdated(updatedTime);
         }
       } catch (error) {
