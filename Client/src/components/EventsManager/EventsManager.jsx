@@ -11,6 +11,13 @@ const EventsManager = () => {
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [newEvent, setNewEvent] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [eventsPerPage] = useState(10);
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [lastUpdated, setLastUpdated] = useState("");
+
   useEffect(() => {
     const fetchEventList = async () => {
       console.log("fetchEventList is running");
@@ -21,6 +28,11 @@ const EventsManager = () => {
 
         console.log(response.data);
         setEvents(response.data);
+
+        if (response.data.length > 0) {
+          const updatedTime = new Date().toLocaleString(); // You can format this as needed
+          setLastUpdated(updatedTime);
+        }
       } catch (error) {
         console.error('Error fetching event data:', error);
       }
@@ -187,15 +199,71 @@ const EventsManager = () => {
     e.stopPropagation();
   };
 
+  const filteredEvents = events.filter(event =>
+    event.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Pagination logic
+  const indexOfLastEvent = currentPage * eventsPerPage;
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+  const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+
+  const totalPages = Math.ceil(events.length / eventsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
+
+  // Searching Logic
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="overflow-x-auto h-full w-full p-4">
-      <div className="mb-4 flex justify-start"> {/* Aligns the button to the left */}
-        <button 
-          onClick={() => handleNewClick()}
-          className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2"
-        >
-          New Event
-        </button>
+      <div className="mb-4 flex justify-between items-center">
+        <div className="flex">
+          <button 
+            onClick={() => handleNewClick()}
+            className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 mr-4"
+          >
+            New Event
+          </button>
+          <input
+            type="text"
+            placeholder="Search events by title..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="border p-2 rounded"
+          />
+        </div>
+        <div className="text-gray-500 text-sm">Last Updated on {lastUpdated}</div>
+        <div className="flex items-center space-x-4"> {/* Added 'space-x-4' for spacing */}
+          <button 
+            onClick={handlePreviousPage} 
+            disabled={currentPage === 1} 
+            className="bg-gray-300 p-2 rounded"
+          >
+            Previous
+          </button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <button 
+            onClick={handleNextPage} 
+            disabled={currentPage === totalPages} 
+            className="bg-gray-300 p-2 rounded"
+          >
+            Next
+          </button>
+        </div>
       </div>
       <table className="min-w-full divide-y divide-gray-200">
         {/* Table Header */}
@@ -223,7 +291,7 @@ const EventsManager = () => {
 
         {/* Table Body */}
         <tbody className="bg-white divide-y divide-gray-200">
-          {events.map((event) => (
+          {currentEvents.map((event) => (
             <tr key={event.eventId}>
               {/* Title */}
               <td className="px-6 py-4 whitespace-normal max-w-[300px]">
@@ -303,7 +371,7 @@ const EventsManager = () => {
           ))}
 
           {/* If no events */}
-          {events.length === 0 && (
+          {filteredEvents.length === 0 && (
             <tr>
               <td
                 className="px-6 py-4 whitespace-nowrap text-center text-gray-500"
@@ -313,6 +381,27 @@ const EventsManager = () => {
               </td>
             </tr>
           )}
+          <tr>
+            <td colSpan="7">
+              <div className="flex justify-between mt-4">
+                <button 
+                  onClick={handlePreviousPage} 
+                  disabled={currentPage === 1} 
+                  className="bg-gray-300 p-2 rounded"
+                >
+                  Previous
+                </button>
+                <span>Page {currentPage} of {totalPages}</span>
+                <button 
+                  onClick={handleNextPage} 
+                  disabled={currentPage === totalPages} 
+                  className="bg-gray-300 p-2 rounded"
+                >
+                  Next
+                </button>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
 
