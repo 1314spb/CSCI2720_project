@@ -10,6 +10,13 @@ const UsersManager = () => {
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [newUser, setNewUser] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(10);
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [lastUpdated, setLastUpdated] = useState("");
+
   useEffect(() => {
     const fetchUsersList = async () => {
       console.log("fetchUsersList is running");
@@ -20,6 +27,11 @@ const UsersManager = () => {
 
         console.log(response.data);
         setUsers(response.data);
+
+        if (response.data.length > 0) {
+          const updatedTime = new Date().toLocaleString(); // You can format this as needed
+          setLastUpdated(updatedTime);
+        }
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -109,42 +121,50 @@ const UsersManager = () => {
   // Handler for form input changes
   const handleNewInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(value);
     setNewUser((prevUser) => ({
       ...prevUser,
       [name]: name=='admin'?(value=='Admin'?true:false):value,
     }));
-    console.log(newUser);
+    if (newUser.admin === undefined) {
+      setNewUser((prevUser) => ({
+        ...prevUser,
+        admin: true
+      }))
+    }
   };
 
   // Handler for saving new user
   const handleCreateUser = (e) => {
     e.preventDefault();
-    setUsers((prevUsers) => [
-      ...prevUsers,
-      { ...newUser }
-    ]);
-
     const saveNewUserInfo = async () => {
       console.log('saveNewUserInfo is runnning');
+      try {
       const response = await apiCsrf.post('/api/admin/createuser', 
-          {
-            username: newUser.username,
-            email: newUser.email,
-            password: newUser.password,
-            admin: newUser.admin
-          },
-          {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true
-          });
-      console.log(response.data);
+        {
+          username: newUser.username,
+          email: newUser.email,
+          password: newUser.password,
+          admin: newUser.admin
+        },
+        {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true
+        });
+        console.log(response.data);
+        setUsers((preUsers) => [
+          ...preUsers,
+          { ...newUser }
+        ]);
+        handleCloseNewModal();
+      } catch (err) {
+        alert(err.response.data.error);
+        console.log(err);
+      }
     }
     saveNewUserInfo();
-
-    handleCloseNewModal();
+    // handleCloseNewModal();
   }
 
   const handleModalClick = (e) => {
@@ -152,15 +172,71 @@ const UsersManager = () => {
     e.stopPropagation();
   };
 
+  const filteredUsers = users.filter(users =>
+    users.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Pagination logic
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  const totalPages = Math.ceil(users.length / usersPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
+
+  // Searching Logic
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="overflow-x-auto h-full w-full p-4">
-      <div className="mb-4 flex justify-start"> {/* Aligns the button to the left */}
-        <button 
-          onClick={() => handleNewClick()}
-          className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2"
-        >
-          New User
-        </button>
+      <div className="mb-4 flex justify-between items-center">
+        <div className="flex">
+          <button 
+            onClick={() => handleNewClick()}
+            className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 mr-4"
+          >
+            New User
+          </button>
+          <input
+            type="text"
+            placeholder="Search users by username..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="border p-2 rounded"
+          />
+        </div>
+        <div className="text-gray-500 text-sm">Last Updated on {lastUpdated}</div>
+        <div className="flex items-center space-x-4">
+          <button 
+            onClick={handlePreviousPage} 
+            disabled={currentPage === 1} 
+            className="bg-gray-300 p-2 rounded"
+          >
+            Previous
+          </button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <button 
+            onClick={handleNextPage} 
+            disabled={currentPage === totalPages} 
+            className="bg-gray-300 p-2 rounded"
+          >
+            Next
+          </button>
+        </div>
       </div>
       <table className="min-w-full divide-y divide-gray-200">
         {/* Table Header */}
@@ -184,7 +260,7 @@ const UsersManager = () => {
 
         {/* Table Body */}
         <tbody className="bg-white divide-y divide-gray-200">
-          {users.map((user) => (
+          {currentUsers.map((user) => (
             <tr key={user.userId}>
               {/* Name & Email */}
               <td className="px-6 py-4 whitespace-nowrap">
@@ -223,7 +299,7 @@ const UsersManager = () => {
           ))}
 
           {/* If no users */}
-          {users.length === 0 && (
+          {filteredUsers.length === 0 && (
             <tr>
               <td
                 className="px-6 py-4 whitespace-nowrap text-center text-gray-500"
@@ -233,6 +309,27 @@ const UsersManager = () => {
               </td>
             </tr>
           )}
+          <tr>
+            <td colSpan="7">
+              <div className="flex justify-between mt-4">
+                <button 
+                  onClick={handlePreviousPage} 
+                  disabled={currentPage === 1} 
+                  className="bg-gray-300 p-2 rounded"
+                >
+                  Previous
+                </button>
+                <span>Page {currentPage} of {totalPages}</span>
+                <button 
+                  onClick={handleNextPage} 
+                  disabled={currentPage === totalPages} 
+                  className="bg-gray-300 p-2 rounded"
+                >
+                  Next
+                </button>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
 

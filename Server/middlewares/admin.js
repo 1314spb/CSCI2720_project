@@ -39,20 +39,32 @@ router.post('/createuser', authenticateUser, async (req, res) => {
         if (data) {
             res.status(400).json({error: "Email already exists"});
         } else {
-            const newUser = new User ({
-                username,
-                email,
-                password: hashedPassword,
-                admin
-            });
-            newUser.save()
-            .then(() => {
-                console.log('User create successfully');
-                res.status(201).json({ message: 'Account created successfully', data: req.body });
+            User.findOne({username: username})
+            .then((data) => {
+                if (data) {
+                    res.status(400).json({error: "Username already exists"});
+                } else {
+                    const newUser = new User ({
+                        username,
+                        email,
+                        password: hashedPassword,
+                        admin
+                    });
+                    newUser.save()
+                    .then(() => {
+                        console.log('User create successfully');
+                        res.status(201).json({ message: 'Account created successfully', data: req.body });
+                    })
+                    .catch((err) => {
+                        console.log('Create user failed');
+                        console.log(err);
+                        res.status(400).send(err);
+                    })
+                }
             })
             .catch((err) => {
-                console.log('Create user failed');
-                res.status(400).json({message: err});
+                console.log('Error reading from User');
+                res.status(500).json({error: 'Error reading from database'});
             })
         }
     })

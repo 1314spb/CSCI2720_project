@@ -247,7 +247,7 @@ const EventsManager = () => {
           />
         </div>
         <div className="text-gray-500 text-sm">Last Updated on {lastUpdated}</div>
-        <div className="flex items-center space-x-4"> {/* Added 'space-x-4' for spacing */}
+        <div className="flex items-center space-x-4">
           <button 
             onClick={handlePreviousPage} 
             disabled={currentPage === 1} 
