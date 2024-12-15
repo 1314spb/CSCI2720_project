@@ -125,7 +125,7 @@ const SortableTable = () => {
   return (
     <Card className="h-full w-full">
       <CardBody className="overflow-scroll px-0">
-        <div className="mb-4">
+        <div className="flex justify-between items-center mb-4">
           <Input
             type="text"
             placeholder="Search by location"
@@ -133,6 +133,25 @@ const SortableTable = () => {
             onChange={handleSearchChange}
             className="flex w-64"
           />
+          <div className="flex items-center space-x-2">
+          <Button
+            className='text-gray-500'
+            onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}
+            disabled={currentPage === 1}
+            variant="outlined"
+          >
+            Previous
+          </Button>
+
+          <Button
+            className='text-gray-500'
+            onClick={() => setCurrentPage(currentPage < totalPages ? currentPage + 1 : totalPages)}
+            disabled={currentPage === totalPages}
+            variant="outlined"
+          >
+            Next
+          </Button>
+        </div>
         </div>
 
         <table className="mt-4 w-full min-w-max table-auto text-left">
@@ -204,25 +223,6 @@ const SortableTable = () => {
       </CardBody>
 
       <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-        <div className="flex items-center space-x-2">
-          <Button
-            className='text-gray-500'
-            onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}
-            disabled={currentPage === 1}
-            variant="outlined"
-          >
-            Previous
-          </Button>
-
-          <Button
-            className='text-gray-500'
-            onClick={() => setCurrentPage(currentPage < totalPages ? currentPage + 1 : totalPages)}
-            disabled={currentPage === totalPages}
-            variant="outlined"
-          >
-            Next
-          </Button>
-        </div>
         <Typography variant="small" color="blue-gray" className="font-normal select-none">
           Page {currentPage} of {totalPages}
         </Typography>
