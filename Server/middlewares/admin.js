@@ -4,6 +4,7 @@ module.exports = router;
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const Event = require('../models/Event');
+const Location = require('../models/Location');
 const authenticateUser = require('./authCheck');
 const bcrypt = require('bcrypt');
 
@@ -13,8 +14,8 @@ router.get('/userlist', authenticateUser, (req, res) => {
     User.find({})
     .then((users) => {
         const userlist = users.map(user => {
-            const { password, ...userWithoutPassword } = user.toObject(); // Convert to plain object
-            return userWithoutPassword; // Return the user object without the password
+            const { password, ...userWithoutPassword } = user.toObject();
+            return userWithoutPassword;
         });
         res.send(userlist);
     })
@@ -141,10 +142,9 @@ router.post('/createevent', authenticateUser, (req, res) => {
     })
 })
 
-// PUT http://server-address/api/admin/editevent/:eventId
-router.put('/editevent/:eventId', authenticateUser, (req, res) => {
-    const eventId = req.params.eventId;
-    const {title, datetime, presenter, description, venue, locId} = req.body;
+// PUT http://server-address/api/admin/editevent
+router.put('/editevent', authenticateUser, (req, res) => {
+    const { eventId, title, datetime, presenter, description, venue, locId } = req.body;
 
     Event.findOneAndUpdate(
         {eventId: eventId},

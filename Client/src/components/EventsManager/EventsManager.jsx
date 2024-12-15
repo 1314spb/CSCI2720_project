@@ -1,48 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import apiCsrf from '../../../apiCsrf';
 
 const initialEvents = [
   {
     id: 1,
-    name: 'Jane Cooper',
-    date: '2024-01-01',
-    time: '12:00 PM - 2:00 PM',
-    location: 'East Kowloon Cultural Centre',
+    title: 'Jane Cooper',
+    datetime: '2024-01-01',
+    venue: 'East Kowloon Cultural Centre',
     presenter: 'Tom Scholz',
     price: 1200,
   },
   {
     id: 2,
-    name: 'John Smith',
-    date: '2024-12-01',
+    title: 'John Smith',
+    datetime: '2024-12-01',
     time: '10:00 AM - 12:00 PM',
-    location: 'Hong Kong City Hall (Concert Hall)',
+    venue: 'Hong Kong City Hall (Concert Hall)',
     presenter: 'Tom Holland',
     price: 3000,
   },
   {
     id: 3,
-    name: 'Jane Doe',
-    date: '2024-06-01',
+    title: 'Jane Doe',
+    datetime: '2024-06-01',
     time: '3:00 PM - 5:00 PM',
-    location: 'Hong Kong Cultural Centre',
+    venue: 'Hong Kong Cultural Centre',
     presenter: 'Tom Hanks',
     price: 5000,
   },
   {
     id: 4,
-    name: 'John Doe',
-    date: '2024-03-01',
+    title: 'John Doe',
+    datetime: '2024-03-01',
     time: '6:00 PM - 8:00 PM',
-    location: 'Queen Elizabeth Stadium',
+    venue: 'Queen Elizabeth Stadium',
     presenter: 'Tom Cruise',
     price: 8000,
   },
   {
     id: 5,
-    name: 'Tom Cruise',
-    date: '2024-09-01',
+    title: 'Tom Cruise',
+    datetime: '2024-09-01',
     time: '9:00 PM - 11:00 PM',
-    location: 'Kowloonbay International Trade & Exhibition Centre',
+    venue: 'Kowloonbay International Trade & Exhibition Centre',
     presenter: 'Tom Hardy',
     price: 10000,
   }
@@ -50,63 +51,103 @@ const initialEvents = [
 
 const EventsManager = () => {
   const [events, setEvents] = useState(initialEvents);
+  const [locations, setLocations] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-
-  const [startTime, setStartTime] = useState('12:00');
-  const [endTime, setEndTime] = useState('14:00');
-
-  const handleEventTimeChange = (eventTime) => {
-    const [start, end] = eventTime.split(' - ');
-    setStartTime(convertTo24Hour(start));
-    setEndTime(convertTo24Hour(end));
-  };
-
-  const convertTo24Hour = (time) => {
-    const [timePart, modifier] = time.split(' ');
-    let [hours, minutes] = timePart.split(':');
-    if (modifier === 'PM' && hours !== '12') {
-      hours = parseInt(hours, 10) + 12;
-    }
-    if (modifier === 'AM' && hours === '12') {
-      hours = '00';
-    }
-    return `${hours}:${minutes}`;
-  };
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
-    handleEventTimeChange('12:00 PM - 2:00 PM');
+    const fetchEventList = async () => {
+      console.log("fetchEventList is running");
+      try {
+        const response = await axios.get('http://localhost:3000/api/user/event', {
+          withCredentials: true, // Include HTTP-only cookies in the request
+        });
+
+        console.log(response.data);
+        setEvents(response.data);
+      } catch (error) {
+        console.error('Error fetching event data:', error);
+      }
+    }
+
+    const fetchLocationList = async () => {
+      console.log("fetchLocationList is running");
+      try {
+        const response = await axios.get('http://localhost:3000/api/user/location', {
+          withCredentials: true, // Include HTTP-only cookies in the request
+        });
+
+        console.log(response.data);
+        setLocations(response.data);
+      } catch (error) {
+        console.error('Error fetching location data:', error);
+      }
+    }
+
+    fetchEventList();
+    fetchLocationList();
   }, []);
 
   // Handler to open modal and set selected event
   const handleEditClick = (event) => {
-    setSelectedLocation(event);
+    setSelectedEvent(event);
     setIsModalOpen(true);
   };
 
   // Handler to close modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedLocation(null);
+    setSelectedEvent(null);
   };
 
   // Handler for form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setSelectedLocation((prevUser) => ({
-      ...prevUser,
-      [name]: value,
-    }));
+    setSelectedEvent((prevUser) => {
+      const updatedEvent = {
+        ...prevUser,
+        [name]: value,
+      }
+      if (name === 'venue') {
+        const selectedLocation = locations.find(location => location.name === value);
+        updatedEvent.locId = selectedLocation ? selectedLocation.locId : null;
+      }
+      return updatedEvent;
+    })
   };
 
   // Handler to save changes
   const handleSaveChanges = (e) => {
     e.preventDefault();
-    setEvents((prevUsers) =>
-      prevUsers.map((event) =>
-        event.id === selectedLocation.id ? selectedLocation : event
+    setEvents((prevEvents) =>
+      prevEvents.map((event) =>
+        event.eventId === selectedEvent.eventId ? selectedEvent : event
       )
     );
+
+    const saveEditInfo = async () => {
+      console.log('saveEditInfo is runnning');
+      console.log(selectedEvent);
+      const response = await apiCsrf.put('/api/admin/editevent', 
+          {
+            eventId: selectedEvent.eventId,
+            title: selectedEvent.title,
+            datetime: selectedEvent.datetime,
+            presenter: selectedEvent.presenter,
+            description: selectedEvent.description,
+            venue: selectedEvent.venue,
+            locId: selectedEvent.locId,
+          },
+          {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true
+          });
+      console.log(response.data);
+    }
+    saveEditInfo();
+
     handleCloseModal();
   };
 
@@ -129,8 +170,9 @@ const EventsManager = () => {
         <thead className="bg-gray-50">
           <tr>
             {[
-              'Event Name',
-              'Location',
+              'Event Title',
+              'Description',
+              'Venue',
               'Price',
               'Presenter(s)',
               'Date & Time',
@@ -151,51 +193,67 @@ const EventsManager = () => {
         <tbody className="bg-white divide-y divide-gray-200">
           {events.map((event) => (
             <tr key={event.id}>
-              {/* Name & Email */}
-              <td className="px-6 py-4 whitespace-nowrap">
-
-
-                {/* User Info */}
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-gray-900 text-left">
-                    {event.name}
+              {/* Title */}
+              <td className="px-6 py-4 whitespace-normal max-w-[300px]">
+                  <div className="ml-4 overflow-hidden">
+                      <div className="text-sm font-medium text-gray-900 text-left whitespace-pre-wrap break-words">
+                          {event.title}
+                      </div>
                   </div>
-
-                </div>
-
               </td>
 
-              {/* Title & Department */}
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900 text-left">{event.location}</div>
+              {/* Description */}
+              <td className="px-6 py-4 whitespace-normal max-w-[400px]">
+                  <div className="overflow-hidden">
+                      <div className="text-sm text-gray-900 text-left whitespace-pre-wrap break-words">
+                          {event.description?event.description:'N/A'}
+                      </div>
+                  </div>
               </td>
 
-              {/* Status */}
-
-
-              {/* Role */}
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-left">
-                ${event.price}
+              {/* Venue */}
+              <td className="px-6 py-4 whitespace-normal max-w-[200px]">
+                  <div className="overflow-hidden">
+                      <div className="text-sm text-gray-900 text-left whitespace-pre-wrap break-words">
+                          {event.venue}
+                      </div>
+                  </div>
               </td>
 
-              <td className="px-6 py-4 whitespace-nowrap flex">
-                <span
-                  className="px-2 inline-flex text-sm leading-5 font-semibold rounded-full text-left bg-green-100 text-green-800"
-                >
-                  {event.presenter}
-                </span>
+              {/* Price */}
+              <td className="px-6 py-4 whitespace-normal text-sm text-gray-500 text-left max-w-[125px]">
+                  <div className="overflow-hidden">
+                      <div className="whitespace-pre-wrap break-words">
+                          {event.price?event.price:'N/A'}
+                      </div>
+                  </div>
               </td>
 
-              {/* Email */}
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-left">
-                <div className="text-sm font-medium text-gray-900 text-left">
-                  {event.date}
-                </div>
-                <div className="text-sm text-gray-500 text-left">{event.time}</div>
+              {/* Presenter */}
+              <td className="px-6 py-4 whitespace-normal text-sm text-gray-500 text-left max-w-[225px]">
+                  <span
+                      className="px-2 inline-flex text-sm leading-5 font-semibold rounded-lg text-left bg-green-100 text-green-800"
+                      style={{ display: 'block', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                      <span className="whitespace-pre-wrap break-words">
+                          {event.presenter}
+                      </span>
+                  </span>
+              </td>
+
+              {/* Date & Time */}
+              <td className="px-6 py-4 whitespace-normal text-sm text-gray-500 text-left max-w-[150px]">
+                  <div className="overflow-hidden">
+                      <div className="whitespace-pre-wrap break-words">
+                          <div className="text-sm font-medium text-gray-900 text-left">
+                              {event.datetime}
+                          </div>
+                      </div>
+                  </div>
               </td>
 
               {/* Actions */}
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button
                   onClick={() => handleEditClick(event)}
                   className="text-indigo-600 hover:text-indigo-900 mr-2"
@@ -227,7 +285,7 @@ const EventsManager = () => {
       </table>
 
       {/* Edit Modal */}
-      {isModalOpen && selectedLocation && (
+      {isModalOpen && selectedEvent && (
         <div className="fixed z-10 inset-0 overflow-y-auto" onClick={handleCloseModal}>
           <div
             className="flex items-center justify-center min-h-screen px-4"
@@ -275,19 +333,19 @@ const EventsManager = () => {
               <div className="p-6 space-y-6">
                 <form onSubmit={handleSaveChanges}>
                   <div className="grid grid-cols-6 gap-6">
-                    {/* Name */}
-                    <div className="col-span-6 sm:col-span-3">
+                    {/* Title */}
+                    <div className="col-span-6 sm:col-span-6">
                       <label
-                        htmlFor="name"
+                        htmlFor="title"
                         className="text-sm font-medium text-gray-900 block mb-2"
                       >
-                        Name
+                        Title
                       </label>
                       <input
                         type="text"
-                        name="name"
-                        id="name"
-                        value={selectedLocation.name}
+                        name="title"
+                        id="title"
+                        value={selectedEvent.title}
                         onChange={handleInputChange}
                         className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
                                    rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
@@ -295,82 +353,92 @@ const EventsManager = () => {
                       />
                     </div>
 
-                    <div className="col-span-6 sm:col-span-3">
+                    {/* Description */}
+                    <div className="col-span-6 sm:col-span-6">
                       <label
-                        htmlFor="location"
+                        htmlFor="description"
                         className="text-sm font-medium text-gray-900 block mb-2"
                       >
-                        Location
+                        Description
+                      </label>
+                      <textarea
+                        type="text"
+                        name="description"
+                        id="description"
+                        value={selectedEvent.description}
+                        onChange={handleInputChange}
+                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
+                                   rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+                      />
+                    </div>
+
+                    {/* Presenter */}
+                    <div className="col-span-6 sm:col-span-6">
+                      <label
+                        htmlFor="presenter"
+                        className="text-sm font-medium text-gray-900 block mb-2"
+                      >
+                        Presenter(s)
                       </label>
                       <input
                         type="text"
-                        name="location"
-                        id="location"
-                        value={selectedLocation.location}
+                        name="presenter"
+                        id="presenter"
+                        value={selectedEvent.presenter}
                         onChange={handleInputChange}
                         className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
                                    rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                         required
                       />
                     </div>
-                    {/* Email */}
+
+                    {/* Venue */}
                     <div className="col-span-6 sm:col-span-3">
                       <label
-                        htmlFor="date"
+                        htmlFor="venue"
                         className="text-sm font-medium text-gray-900 block mb-2"
                       >
-                        Date
+                        Venue
                       </label>
-                      <input
-                        type="date"
-                        name="date"
-                        id="date"
-                        value={selectedLocation.date}
+                      {/* <input
+                        type="text"
+                        name="venue"
+                        id="venue"
+                        value={selectedEvent.venue}
                         onChange={handleInputChange}
                         className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
                                    rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                         required
-                      />
+                      /> */}
+                      <select
+                        name="venue"
+                        id="venue"
+                        value={selectedEvent.venue}
+                        onChange={handleInputChange}
+                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
+                                   rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+                        required
+                      >
+                        {locations.map((location) => (
+                            <option key={location.id} value={location.name}>
+                                {location.name}
+                            </option>
+                        ))}
+                      </select>
                     </div>
-
-                    <div className="col-span-6 sm:col-span-6 flex space-x-4">
-                      <div className="flex-1">
-                        <label htmlFor="start-time" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Start time:</label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
-                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                              <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <input type="time" id="start-time" className="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" min="09:00" max="18:00" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
-                        </div>
-                      </div>
-
-                      <div className="flex-1">
-                        <label htmlFor="end-time" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">End time:</label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
-                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                              <path fillRule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                          <input type="time" id="end-time" className="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" min="09:00" max="18:00" value={endTime} onChange={(e) => setEndTime(e.target.value)} required />
-                        </div>
-                      </div>
-                    </div>
-
+                    {/* Date & Time */}
                     <div className="col-span-6 sm:col-span-3">
                       <label
-                        htmlFor="name"
+                        htmlFor="datetime"
                         className="text-sm font-medium text-gray-900 block mb-2"
                       >
-                        Price ($)
+                        Date & Time
                       </label>
                       <input
                         type="text"
-                        name="department"
-                        id="department"
-                        value={selectedLocation.price}
+                        name="datetime"
+                        id="datetime"
+                        value={selectedEvent.datetime}
                         onChange={handleInputChange}
                         className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
                                    rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
@@ -383,13 +451,13 @@ const EventsManager = () => {
                         htmlFor="price"
                         className="text-sm font-medium text-gray-900 block mb-2"
                       >
-                        Presenter(s)
+                        Price ($)
                       </label>
                       <input
                         type="text"
-                        name="presenter"
-                        id="presenter"
-                        value={selectedLocation.presenter}
+                        name="price"
+                        id="price"
+                        value={selectedEvent.price}
                         onChange={handleInputChange}
                         className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
                                    rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
