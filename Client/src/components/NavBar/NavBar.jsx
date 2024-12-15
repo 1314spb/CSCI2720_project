@@ -28,6 +28,7 @@ const NavBar = () => {
       console.log('Error during logout', error);
     }
   }
+
   const toggleDropdown = () => {
     setDropdownOpen((prev) => !prev);
   };
@@ -44,7 +45,6 @@ const NavBar = () => {
       setMenuOpen(false);
     }
   };
-
 
   useEffect(() => {
     fetchUserData(setUser, setError);
@@ -64,8 +64,9 @@ const NavBar = () => {
   const userInitial = user.user.username ? user.user.username.charAt(0).toUpperCase() : 'U';
 
   return (
-    <nav className="bg-white border-gray-200 dark:bg-gray-900 w-full fixed z-50 opacity-85 top-0 left-0 right-0">
+    <nav className="bg-white border-gray-200 dark:bg-gray-900 w-full fixed z-50 top-0 left-0 right-0 opacity-85">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        
         <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -77,16 +78,16 @@ const NavBar = () => {
         <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative" ref={dropdownRef}>
           <button
             type="button"
-            className="items-center bg-white-800 rounded-full p-0 w-9 h-9 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+            className="flex items-center justify-center bg-indigo-700 text-white rounded-full p-0 w-9 h-9 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
             onClick={toggleDropdown}
             aria-haspopup="true"
             aria-expanded={isDropdownOpen}
           >
-          {userInitial}
+            {userInitial}
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 z-50 my-2 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 mt-72">
+            <div className="absolute right-0 z-50 mt-72 w-56 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700">
               <div className="px-4 py-3">
                 <span className="block text-sm text-gray-900 dark:text-white select-none">{user.user.username}</span>
                 <span className="block text-sm text-gray-500 truncate dark:text-gray-400 select-none">{user.user.email}</span>
@@ -106,8 +107,8 @@ const NavBar = () => {
                   <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Profile</a>
                 </li>
                 <li>
-
-                  <a href="#" onClick={() => { handleLogout() }}
+                  <a href="#"
+                    onClick={() => { handleLogout() }}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                     Sign out
                   </a>
@@ -122,7 +123,7 @@ const NavBar = () => {
             className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
             onClick={toggleMenu}
             aria-controls="navbar-user"
-            aria-expanded="false"
+            aria-expanded={isMenuOpen}
           >
             <span className="sr-only">Open main menu</span>
             <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
@@ -131,7 +132,7 @@ const NavBar = () => {
           </button>
         </div>
 
-        <div className={`items-center justify-between w-full md:flex md:w-auto md:order-1 ${isMenuOpen ? 'block' : 'hidden'}`} id="navbar-user"> {/* 根据状态控制显示 */}
+        <div className={`items-center justify-between w-full md:flex md:w-auto md:order-1 ${isMenuOpen ? 'block' : 'hidden'}`} id="navbar-user"> {/* 控制显示 */}
           <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
             <li>
               <a href="/" className="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500" aria-current="page">Home</a>

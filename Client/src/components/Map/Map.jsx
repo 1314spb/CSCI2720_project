@@ -34,7 +34,6 @@ const Map = () => {
         ]
     });
     const [selectedVenue, setSelectedVenue] = useState(null);
-    const [favorites, setFavorites] = useState([]);
 
     const fetchVenues = async () => {
         console.log("fetchVenues called");
@@ -60,7 +59,7 @@ const Map = () => {
 
             const venueList = locationsWithFavorites.map((venue) => ({
                 id: venue.locId,
-                nameEnglish: venue.name,
+                nameE: venue.name,
                 numberOfEvents: venue.numEvents,
                 venuelatitude: parseFloat(venue.lat),
                 venuelongitude: parseFloat(venue.long),
@@ -77,16 +76,6 @@ const Map = () => {
     useEffect(() => {
         fetchVenues();
     }, []);
-    
-    const handleToggleFavorite = (venueId) => {
-        setFavorites(prevFavorites => {
-            if (prevFavorites.includes(venueId)) {
-                return prevFavorites.filter(id => id !== venueId);
-            } else {
-                return [...prevFavorites, venueId];
-            }
-        });
-    };
 
     const changeFavority = async (locId, isFavorite) => {
         console.log(`Changing favorite status for locId: ${locId}, isFavorite: ${isFavorite}`);
@@ -209,7 +198,7 @@ const Map = () => {
                 setSelectedVenue(updatedVenue);
             }
             }       
-        console.log("selectedVenues is: ", selectedVenue);
+        // console.log("selectedVenues is: ", selectedVenue);
     }, [venues, location.search]);
 
     const handleAddComment = (venueId, comment) => {
@@ -220,7 +209,6 @@ const Map = () => {
             [venueId]: prevComments[venueId] ? [...prevComments[venueId], comment] : [comment]
         }));
     };
-
 
     return (
         <div className='relative w-full h-screen'>
