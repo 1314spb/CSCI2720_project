@@ -2,55 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import apiCsrf from '../../../apiCsrf';
 
-const initialEvents = [
-  {
-    id: 1,
-    title: 'Jane Cooper',
-    datetime: '2024-01-01',
-    venue: 'East Kowloon Cultural Centre',
-    presenter: 'Tom Scholz',
-    price: 1200,
-  },
-  {
-    id: 2,
-    title: 'John Smith',
-    datetime: '2024-12-01',
-    time: '10:00 AM - 12:00 PM',
-    venue: 'Hong Kong City Hall (Concert Hall)',
-    presenter: 'Tom Holland',
-    price: 3000,
-  },
-  {
-    id: 3,
-    title: 'Jane Doe',
-    datetime: '2024-06-01',
-    time: '3:00 PM - 5:00 PM',
-    venue: 'Hong Kong Cultural Centre',
-    presenter: 'Tom Hanks',
-    price: 5000,
-  },
-  {
-    id: 4,
-    title: 'John Doe',
-    datetime: '2024-03-01',
-    time: '6:00 PM - 8:00 PM',
-    venue: 'Queen Elizabeth Stadium',
-    presenter: 'Tom Cruise',
-    price: 8000,
-  },
-  {
-    id: 5,
-    title: 'Tom Cruise',
-    datetime: '2024-09-01',
-    time: '9:00 PM - 11:00 PM',
-    venue: 'Kowloonbay International Trade & Exhibition Centre',
-    presenter: 'Tom Hardy',
-    price: 10000,
-  }
-];
-
 const EventsManager = () => {
-  const [events, setEvents] = useState(initialEvents);
+  const [events, setEvents] = useState([]);
   const [locations, setLocations] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -152,9 +105,18 @@ const EventsManager = () => {
   };
 
   // Handler to delete a event (Optional)
-  const handleDeleteClick = (userId) => {
+  const handleDeleteClick = (eventId) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
-      setEvents((prevUsers) => prevUsers.filter((event) => event.id !== userId));
+      setEvents((prevEvents) => prevEvents.filter((event) => event.eventId !== eventId));
+
+      const deleteEvent = async () => {
+        console.log('deleteEvent is runnning');
+        const response = await apiCsrf.delete(`/api/admin/deleteEvent/${eventId}`, {
+            withCredentials: true
+            });
+        console.log(response.data);
+      }
+      deleteEvent();
     }
   };
 
@@ -192,7 +154,7 @@ const EventsManager = () => {
         {/* Table Body */}
         <tbody className="bg-white divide-y divide-gray-200">
           {events.map((event) => (
-            <tr key={event.id}>
+            <tr key={event.eventId}>
               {/* Title */}
               <td className="px-6 py-4 whitespace-normal max-w-[300px]">
                   <div className="ml-4 overflow-hidden">
@@ -261,7 +223,7 @@ const EventsManager = () => {
                   Update
                 </button>
                 <button
-                  onClick={() => handleDeleteClick(event.id)}
+                  onClick={() => handleDeleteClick(event.eventId)}
                   className="text-red-600 hover:text-red-900"
                 >
                   Delete
@@ -400,16 +362,6 @@ const EventsManager = () => {
                       >
                         Venue
                       </label>
-                      {/* <input
-                        type="text"
-                        name="venue"
-                        id="venue"
-                        value={selectedEvent.venue}
-                        onChange={handleInputChange}
-                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
-                                   rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                        required
-                      /> */}
                       <select
                         name="venue"
                         id="venue"
@@ -420,7 +372,7 @@ const EventsManager = () => {
                         required
                       >
                         {locations.map((location) => (
-                            <option key={location.id} value={location.name}>
+                            <option key={location.locId} value={location.name}>
                                 {location.name}
                             </option>
                         ))}
