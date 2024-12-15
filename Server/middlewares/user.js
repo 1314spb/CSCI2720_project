@@ -195,47 +195,29 @@ router.put('/removeFavLoc', authenticateUser, async (req, res) => {
     }
 });
 
-// GET http://server-address/api/user/comment
-router.get('/comment/:locId', authenticateUser, (req, res) => {
-    const locId = req.params.locId;
-
-    Location.findOne({locId: locId})
-    .then((data) => {
-        console.log('location comments found');
-        res.send(data.comment);
-    })
-    .catch((err) => {
-        console.log('Error reading from Location');
-        res.status(500).json({message: 'Error reading from Location'})
-    })
-})
-
 // POST http://server-address/api/user/comment
 router.put('/addComment', authenticateUser, async (req, res) => {
     try {
-        const {locId} = req.loc;
+        const {userId} = req.user;
+        const { locId, comment } = req.body; 
         const loc = await Location.findOne({locId});
-        const { comment } = req.body; 
         console.log(comment);
+        console.log(userId);
         const updatedLocation = await Location.findByIdAndUpdate(
             loc,
-            { $addToSet: { comment: [comment]} },
+            { $addToSet: { comments: { comment: comment, userId: userId } } },
             { new: true }
         )
         if(!updatedLocation){
-            return res.status(404).json({message: "User not found"});
+            return res.status(404).json({message: "Location not found"});
         }
-        console.log(`updatedLocation.comment is ${updatedLocation.comment}`);
-        const Comments = await Location.find({ locId: {$in: updatedLocation.comment}});
+        console.log(`updatedLocation.comment is ${updatedLocation.comments.at(-1)}`);
         res.status(200).json({
-            message: 'Location comments updated successfully',
-            LocationData: {
-                locId: updatedLocation.locId,
-                comment: Comments,
-            },
+            message: 'Location comments updated successfully'
         });
     } catch (error) {
         console.log("Got error while updating comments");
+        console.log(error);
         res.status(500).json({ message: error.message });
     }
 })

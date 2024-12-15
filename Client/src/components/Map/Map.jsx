@@ -16,23 +16,7 @@ const Map = () => {
     const mapInstanceRef = useRef(null);
 
     const [userMarker, setUserMarker] = useState(null);
-    const [comments, setComments] = useState({
-        '36311771': [
-            "這個地方真的很棒，特別適合家庭出遊！",
-            "每次來都能發現新的美景，值得一來再來！",
-            "環境非常宜人，適合散步和野餐！"
-        ],
-        '87210195': [
-            "這裡的食物非常美味，特別推薦他們的特色菜！",
-            "服務態度很好，讓人感覺賓至如歸！",
-            "無論是午餐還是晚餐，這裡都是個不錯的選擇！"
-        ],
-        '36310035': [
-            "這個景點的歷史非常有趣，值得一探究竟！",
-            "拍照的好地方，特別是夕陽西下時！",
-            "裡面的展覽很精彩，讓我學到了很多新知識！"
-        ]
-    });
+    const [comments, setComments] = useState({});
     const [selectedVenue, setSelectedVenue] = useState(null);
 
     const fetchVenues = async () => {
@@ -64,10 +48,25 @@ const Map = () => {
                 venuelatitude: parseFloat(venue.lat),
                 venuelongitude: parseFloat(venue.long),
                 isFavorite: venue.isFavorite,
-
             }));
+
+            const comments = locationsResponse.data.reduce((acc, { locId, comments }) => {
+                // Initialize array if locId not already in accumulator
+                if (!acc[locId]) {
+                    acc[locId] = [];
+                }
+                
+                // Extract comments and push them to the corresponding locId
+                comments.forEach(({ comment }) => {
+                    acc[locId].push(comment);
+                });
+
+                return acc;
+            }, {});
             console.log('Updated venues:', venueList);
             setVenues(venueList);
+            setComments(comments);
+            
         } catch (error) {
             console.error('Error fetching locations or user favorites:', error);
         }
@@ -204,10 +203,34 @@ const Map = () => {
     const handleAddComment = (venueId, comment) => {
         if (!comment.trim()) return;
 
-        setComments(prevComments => ({
-            ...prevComments,
-            [venueId]: prevComments[venueId] ? [...prevComments[venueId], comment] : [comment]
-        }));
+        console.log(venueId);
+        console.log(comment);
+        const addComment = async () => {
+            console.log('addComment is running');
+            try {
+                const response = await apiCsrf.put('/api/user/addComment',
+                    {
+                        locId: venueId,
+                        comment: comment
+                    },
+                    {
+                        headers: {
+                        'Content-Type': 'application/json',
+                        },
+                        withCredentials: true
+                    }
+                );
+                console.log(response.data);
+                setComments(prevComments => ({
+                    ...prevComments,
+                    [venueId]: prevComments[venueId] ? [...prevComments[venueId], comment] : [comment]
+                }));
+            } catch (err) {
+                alert('Add comment failed, check connection or try again later');
+                console.log(err);
+            }
+        }
+        addComment();
     };
 
     return (
