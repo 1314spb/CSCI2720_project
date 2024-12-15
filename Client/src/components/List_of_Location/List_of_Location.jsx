@@ -233,6 +233,24 @@ const ListOfLocation = () => {
                   </div>
                 )}
               </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  className='text-gray-800'
+                  onClick={previousPage}
+                  disabled={currentPage === 0}
+                  variant="outlined"
+                >
+                  Previous
+                </Button>
+                <Button
+                  className='text-gray-800'
+                  onClick={nextPage}
+                  disabled={currentPage === totalFilteredPages - 1}
+                  variant="outlined"
+                >
+                  Next
+                </Button>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full table-fixed text-left">
@@ -308,26 +326,11 @@ const ListOfLocation = () => {
             </div>
           </CardBody>
           <CardFooter className="flex items-center justify-between border-t border-gray-200 p-4 bg-gray-50">
-            <div className="flex items-center space-x-2">
-              <Button
-                className='text-gray-800'
-                onClick={previousPage}
-                disabled={currentPage === 0}
-                variant="outlined"
-              >
-                Previous
-              </Button>
-              <Button
-                className='text-gray-800'
-                onClick={nextPage}
-                disabled={currentPage === totalFilteredPages - 1}
-                variant="outlined"
-              >
-                Next
-              </Button>
-            </div>
             <Typography variant="small" color="gray" className="font-normal select-none">
               Page {currentPage + 1} of {totalFilteredPages}
+            </Typography>
+            <Typography variant="small" color="gray" className="font-normal select-none">
+              Last updated time: {}
             </Typography>
           </CardFooter>
         </Card>
