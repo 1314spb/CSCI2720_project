@@ -23,6 +23,7 @@ const ListOfEvents = () => {
     const [sortOrder, setSortOrder] = useState({ column: 'like', direction: 'asc' });
     const [likedEvents, setLikedEvents] = useState(new Set());
     const [selectedDescription, setSelectedDescription] = useState(null); // Track selected description
+    const [lastUpdated, setLastUpdated] = useState("");
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -41,6 +42,11 @@ const ListOfEvents = () => {
                     presenter: event.presenter || 'N/A'
                 }));
                 setEvents(eventList);
+
+                if (eventsResponse.data.length > 0) {
+                    const updatedTime = new Date().toLocaleString();
+                    setLastUpdated(updatedTime);
+                  }
             } catch (error) {
                 console.error('Error fetching events:', error);
             }
@@ -272,7 +278,7 @@ const ListOfEvents = () => {
                             Page {currentPage + 1} of {totalFilteredPages}
                         </Typography>
                         <Typography variant="small" color="gray" className="font-normal select-none">
-                            Last updated time: {}
+                            Last updated time: {lastUpdated}
                         </Typography>
                     </CardFooter>
                 </Card>

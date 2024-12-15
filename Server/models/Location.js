@@ -1,17 +1,13 @@
 const mongoose = require('mongoose');
 
 const CommentSchema = mongoose.Schema({
-    username: {
+    userId: {
         type: Number,
         required: true,
     },
-    text: {
+    comment: {
         type: String,
         required: true,
-    },
-    date: {
-        type: Date,
-        default: Date.now,
     }
 });
 
@@ -37,7 +33,7 @@ const LocationSchema = mongoose.Schema({
         type: Number,
         default: 0,
     },
-    comment: [CommentSchema]
+    comments: [CommentSchema]
 })
 
 module.exports = mongoose.model('Location', LocationSchema);
