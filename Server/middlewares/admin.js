@@ -51,9 +51,9 @@ router.post('/createuser', authenticateUser, async (req, res) => {
                         admin
                     });
                     newUser.save()
-                    .then(() => {
+                    .then((data) => {
                         console.log('User create successfully');
-                        res.status(201).json({ message: 'Account created successfully', data: req.body });
+                        res.status(201).json({ message: 'Account created successfully', data: data});
                     })
                     .catch((err) => {
                         console.log('Create user failed');
@@ -78,14 +78,20 @@ router.post('/createuser', authenticateUser, async (req, res) => {
 router.put('/editPersonalInfo', authenticateUser, async (req, res) => {
     console.log('Edit personal info request received');
     try {
-        const { userId, username, admin } = req.body;
+        const { userId, username, admin, email } = req.body;
         const user = await User.findOne({userId});
+        const userWithEmail = await User.findOne({email});
+        if(userWithEmail) {
+            console.log('email already in use');
+            res.status(400).json({message: 'Email already in use'});
+        }
         console.log("User found : ", user);
         const updatedUser = await User.findByIdAndUpdate(
             user,
             { 
                 username: username,
-                admin: admin
+                admin: admin,
+                email: email
             },
             { new: true }
         )
@@ -97,12 +103,12 @@ router.put('/editPersonalInfo', authenticateUser, async (req, res) => {
             userData: {
                 userId: updatedUser._id,
                 password: updatedUser.password,
-                admin: admin
+                admin: admin,
+                email: email
             },
         });
     } catch (error) {
         console.log("Error while updating user information : ", error);
-        res.status(500).json({ message: error.message });
     }
 
 })
@@ -139,10 +145,11 @@ router.post('/createevent', authenticateUser, (req, res) => {
     })
 
     newEvent.save()
-    .then(() => {
+    .then((data) => {
         console.log('New Event created successfully');
         res.status(201).json({
-            message: 'New Event created successfully'
+            message: 'New Event created successfully',
+            data: data
         })
     })
     .catch((err) => {
