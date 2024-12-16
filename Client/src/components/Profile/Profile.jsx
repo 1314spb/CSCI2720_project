@@ -10,23 +10,26 @@ const Profile = () => {
     const [enteredPassword, setEnteredPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [statusMessage, setStatusMessage] = useState('');
+    const [statusType, setStatusType] = useState('')
+
+    const fetchProfileInfo = async () => {
+        console.log("fetchProfileInfo is running");
+        try {
+          const response = await axios.get('http://localhost:3000/api/user/getPersonalInfo', {
+            withCredentials: true, // Include HTTP-only cookies in the request
+          });
+
+          const user = response.data.user;
+          setFullName(user.username);
+          setEmail(user.email);
+          setPassword(user.password);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      };
 
     useEffect(() => {
-        const fetchProfileInfo = async () => {
-            console.log("fetchProfileInfo is running");
-            try {
-              const response = await axios.get('http://localhost:3000/api/user/getPersonalInfo', {
-                withCredentials: true, // Include HTTP-only cookies in the request
-              });
-
-              const user = response.data.user;
-              setFullName(user.username);
-              setEmail(user.email);
-              setPassword(user.password);
-            } catch (error) {
-              console.error('Error fetching user data:', error);
-            }
-          };
         fetchProfileInfo();
     }, []);
 
@@ -35,27 +38,37 @@ const Profile = () => {
         if (newPassword.length != 0) {
             const isMatch = await bcrypt.compare(enteredPassword, password);
             if (!isMatch) {
-                alert("Incorrect current password");
+                // alert("Incorrect current password");
+                setStatusType('error');
+                setStatusMessage('Incorrect current password.');
                 return;
             }
 
             if (newPassword !== confirmPassword) {
-                alert("New passwords do not match!");
+                // alert("New passwords do not match!");
+                setStatusType('error');
+                setStatusMessage('New passwords do not match!');
                 return;
             }
 
             if (enteredPassword === newPassword) {
-                alert("New password must be different from the current password!");
+                // alert("New password must be different from the current password!");
+                setStatusType('error');
+                setStatusMessage('New password must be different from the current password!');
                 return;
             }
 
             if (newPassword.length < 8) {
-                alert("New password must be at least 8 characters long!");
+                // alert("New password must be at least 8 characters long!");
+                setStatusType('error');
+                setStatusMessage('New password must be at least 8 characters long!');
                 return;
             }
 
             if (newPassword.search(/[a-z]/) < 0) {
-                alert("New password must contain at least one lowercase letter!");
+                // alert("New password must contain at least one lowercase letter!");
+                setStatusType('error');
+                setStatusMessage('New password must contain at least one lowercase letter!');
                 return;
             }
         }
@@ -76,8 +89,12 @@ const Profile = () => {
                 withCredentials: true
                 });
             console.log(response.data);
+            setStatusType('success');
+            setStatusMessage('Password changed successfully!');
+            fetchProfileInfo();
         }
         saveEditInfo();
+        // fetchProfileInfo();
     };
 
     return (
@@ -152,7 +169,15 @@ const Profile = () => {
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                             />
                         </div>
-
+                        {statusMessage && (
+                            <p
+                                className={`text-sm ${
+                                    statusType === 'success' ? 'text-green-500' : 'text-red-500'
+                                } mt-4`}
+                            >
+                                {statusMessage}
+                            </p>
+                        )}
                         <div className="flex justify-end">
                             <button type="submit" className="text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:focus:ring-indigo-800">
                                 Save
