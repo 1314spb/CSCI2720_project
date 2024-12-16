@@ -90,7 +90,7 @@ const Profile = () => {
                 });
             console.log(response.data);
             setStatusType('success');
-            setStatusMessage('Password changed successfully!');
+            setStatusMessage('Changed successfully!');
             fetchProfileInfo();
         }
         saveEditInfo();
