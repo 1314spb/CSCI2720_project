@@ -90,11 +90,10 @@ const Profile = () => {
                 });
             console.log(response.data);
             setStatusType('success');
-            setStatusMessage('Changed successfully!');
+            setStatusMessage('Information changed successfully!');
             fetchProfileInfo();
         }
         saveEditInfo();
-        // fetchProfileInfo();
     };
 
     return (

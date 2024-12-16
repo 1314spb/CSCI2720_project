@@ -165,14 +165,11 @@ const EventsManager = () => {
   // Handler for saving new event
   const handleCreateEvent = (e) => {
     e.preventDefault();
-    setEvents((prevEvents) => [
-      ...prevEvents,
-      { ...newEvent }
-    ]);
 
     const saveNewEventInfo = async () => {
       console.log('saveNewEventInfo is runnning');
-      const response = await apiCsrf.post('/api/admin/createevent', 
+      try {
+        const response = await apiCsrf.post('/api/admin/createevent', 
           {
             title: newEvent.title,
             description: newEvent.description,
@@ -187,11 +184,17 @@ const EventsManager = () => {
           },
           withCredentials: true
           });
-      console.log(response.data);
+        console.log(response.data);
+        setEvents((prevEvents) => [
+          ...prevEvents,
+          { ...response.data.data }
+        ]);
+        handleCloseNewModal();
+      } catch (err) {
+
+      }
     }
     saveNewEventInfo();
-
-    handleCloseNewModal();
   }
 
   const handleModalClick = (e) => {

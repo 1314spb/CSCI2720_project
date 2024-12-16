@@ -72,11 +72,13 @@ const UsersManager = () => {
 
     const saveEditInfo = async () => {
       console.log('saveEditInfo is runnning');
-      const response = await apiCsrf.put('/api/admin/editPersonalInfo', 
+      try {
+        const response = await apiCsrf.put('/api/admin/editPersonalInfo', 
           {
             userId: selectedUser.userId,
             username: selectedUser.username,
-            admin: selectedUser.admin
+            admin: selectedUser.admin,
+            email: selectedUser.email
           },
           {
           headers: {
@@ -84,11 +86,14 @@ const UsersManager = () => {
           },
           withCredentials: true
           });
-      console.log(response.data);
+
+          handleCloseEditModal();
+      } catch (err) {
+        alert(err.response.data.message);
+      }
+      
     }
     saveEditInfo();
-
-    handleCloseEditModal();
   };
 
   // Handler to delete a user (Optional)
@@ -155,7 +160,7 @@ const UsersManager = () => {
         console.log(response.data);
         setUsers((preUsers) => [
           ...preUsers,
-          { ...newUser }
+          { ...response.data.data }
         ]);
         handleCloseNewModal();
       } catch (err) {
@@ -164,7 +169,6 @@ const UsersManager = () => {
       }
     }
     saveNewUserInfo();
-    // handleCloseNewModal();
   }
 
   const handleModalClick = (e) => {
@@ -416,9 +420,9 @@ const UsersManager = () => {
                         id="email"
                         value={selectedUser.email}
                         onChange={handleEditInputChange}
-                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-400 sm:text-sm 
+                        className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm 
                                    rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                        readOnly
+                        required
                       />
                     </div>
 
