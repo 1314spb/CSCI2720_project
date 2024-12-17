@@ -9,7 +9,6 @@ This project is a full-stack application built with Express for the backend and 
 - [Installation](#installation)
 - [Building the React App](#building-the-react-app)
 - [Running the Express Server](#running-the-express-server)
-- [API Endpoints](#api-endpoints)
 
 ## Prerequisites
 
@@ -20,7 +19,7 @@ Before you begin, ensure you have the following installed:
 
 You will also need to setup the MongoDB for database, you may also install MongoDB Compass.
 
-## Project Structure
+## Project Basic Structure
 ```
 /project
 ├── /client         # React frontend
@@ -31,8 +30,8 @@ You will also need to setup the MongoDB for database, you may also install Mongo
 └── /server         # Express backend
   ├── /config       # Database config or other configurations
   ├── /middlewares  # Middlewares
+  ├── /models       # Database models
   ├── /utils        # Utilities
-  ├── app.js        # Express server
   ├── app.js        # Express server
   └── package.json  # Express dependencies
 ```
@@ -73,10 +72,13 @@ node app.js
 ```
 The server will start and listen on the specified port (default is 3000).
 
-3. Open your browser and navigate to:
+## Starting the app
+1. Open another terminal and navigate to the client directory:
 ```
-http://localhost:3000
+cd ../client
 ```
-You should see your React application served by the Express server.
-
-## API Endpoints
+2. Start the application locally
+```
+npm run dev
+```
+3. You can now browse the application in http://localhost:5173/
