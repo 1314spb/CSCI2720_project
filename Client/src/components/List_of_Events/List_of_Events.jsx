@@ -65,6 +65,7 @@ const ListOfEvents = () => {
 
                 const venueList = locationsResponse.data.map(venue => ({
                     id: venue.locId,
+                    name: venue.name,
                     venuelatitude: venue.lat,
                     venuelongitude: venue.long,
                 }));
@@ -258,14 +259,12 @@ const ListOfEvents = () => {
                                         const isLiked = likedEvents.has(id);
 
                                         const venue = venues.find(v => v.id === venueId);
-                                        const venuelatitude = venue ? venue.venuelatitude : null;
-                                        const venuelongitude = venue ? venue.venuelongitude : null;
-
+                                        
                                         return (
                                             <tr key={id} className="hover:bg-gray-200">
                                                 <td className={`${classes} break-words whitespace-normal`}>
-                                                    <Link to={`/map?lat=${venuelatitude}&lng=${venuelongitude}&status=true`} className="inline-block bg-slate-200 text-white font-semibold py-2 px-4 rounded-md hover:bg-slate-300 transition-colors duration-200">
-                                                        <Typography variant="small" color="gray" className="font-normal">{venueId}</Typography>
+                                                    <Link to={`/map?id=${venueId}&status=true`} className="inline-block bg-slate-200 text-white font-semibold py-2 px-4 rounded-md hover:bg-slate-300 transition-colors duration-200">
+                                                        <Typography variant="small" color="gray" className="font-normal">{venue.name}</Typography>
                                                     </Link>
                                                 </td>
                                                 <td className={`${classes} break-words whitespace-normal`}>

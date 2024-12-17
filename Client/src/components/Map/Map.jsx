@@ -122,10 +122,8 @@ const Map = () => {
     useEffect(() => {
         if (mapInstanceRef.current) return;
 
-        const queryParams = new URLSearchParams(location.search);
-        const lat = parseFloat(queryParams.get('lat'));
-        const lng = parseFloat(queryParams.get('lng'));
-        const center = lat && lng ? [lng, lat] : [userLocation.lng, userLocation.lat];
+        // const queryParams = new URLSearchParams(location.search);
+        const center = [userLocation.lng, userLocation.lat];
 
         mapInstanceRef.current = new mapboxgl.Map({
             container: mapContainerRef.current,
@@ -187,10 +185,12 @@ const Map = () => {
         const triggercommentarea = queryParams.get('status') === 'true';
 
         if (triggercommentarea && venues.length > 0) {
-            setSelectedVenue(venues[0]);
-            map.flyTo({ center: [venues[0].venuelongitude, venues[0].venuelatitude], zoom: 14 });
+            const locId = parseInt(queryParams.get('id'));
+            const venue = venues.find(venue => venue.id === locId);
+            setSelectedVenue(venue);
+            map.flyTo({ center: [venue.venuelongitude, venue.venuelatitude], zoom: 14 });
         }
-    // Ensure selectedVenue reflects the latest changes in venues
+        // Ensure selectedVenue reflects the latest changes in venues
         if (selectedVenue) {
             const updatedVenue = venues.find((venue) => venue.id === selectedVenue.id);
             if (updatedVenue) {

@@ -299,7 +299,7 @@ const ListOfLocation = () => {
                             <Typography variant="small" color="gray" className="font-normal">{id}</Typography>
                           </td>
                           <td className={`${classes} break-words whitespace-normal`}>
-                            <Link to={`/map?lat=${venuelatitude}&lng=${venuelongitude}&status=${'true'}`} className="inline-block bg-slate-200 text-white font-semibold py-2 px-4 rounded-md hover:bg-slate-300 transition-colors duration-200">
+                            <Link to={`/map?id=${id}&status=${'true'}`} className="inline-block bg-slate-200 text-white font-semibold py-2 px-4 rounded-md hover:bg-slate-300 transition-colors duration-200">
                               <Typography variant="small" color="gray" className="font-normal">{nameEnglish}</Typography>
                             </Link>
                           </td>
