@@ -68,9 +68,9 @@ cd ../server
 ```
 2. Start the Express server:
 ```
-node app.js
+npm run dev
 ```
-The server will start and listen on the specified port (default is 3000).
+The server will start and listen on the port 3000.
 
 ## Starting the app
 1. Open another terminal and navigate to the client directory:
