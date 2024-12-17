@@ -10,6 +10,7 @@ import {
 } from "@material-tailwind/react";
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import apiCsrf from '../../../apiCsrf';
 
 const TABLE_HEAD = ["Venue", "Date", "Title", "Description", "Presenter","Price", "Like"];
 
@@ -77,6 +78,25 @@ const ListOfEvents = () => {
     }, []);
 
     useEffect(() => {
+        const fetchLikes = async () => {
+            try {
+                const likesResponse = await axios.get('http://localhost:3000/api/user/likes', {
+                    withCredentials: true,
+                });
+                const updatedLikedEvents = new Set(likedEvents);
+                likesResponse.data.forEach(eventId => {
+                    updatedLikedEvents.add(eventId);
+                });
+                setLikedEvents(updatedLikedEvents);
+            } catch (error) {
+                console.error('Error fetching locations or user favorites:', error);
+            }
+        };
+        
+        fetchLikes();
+    }, [])
+
+    useEffect(() => {
         const startIndex = currentPage * rowsLimit;
         const filteredEvents = events.filter(item =>
             item.title.toLowerCase().includes(search.toLowerCase())
@@ -130,12 +150,30 @@ const ListOfEvents = () => {
     };
 
     const toggleLike = (id) => {
+        const addLike = async (eventId) => {
+            const addLikeResponse = await apiCsrf.put('http://localhost:3000/api/user/addLike' ,
+                { eventId: eventId }, 
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    withCredentials: true
+                });
+        }
+        const removeLike = async (eventId) => {
+            const removeLikeResponse = await apiCsrf.put('http://localhost:3000/api/user/removeLike' ,
+                { eventId: id }, 
+                {
+                    headers: { 'Content-Type': 'application/json' },
+                    withCredentials: true
+                });
+        }
         setLikedEvents((prev) => {
             const newLikedEvents = new Set(prev);
             if (newLikedEvents.has(id)) {
                 newLikedEvents.delete(id);
+                removeLike(id);
             } else {
                 newLikedEvents.add(id);
+                addLike(id);
             }
             return newLikedEvents;
         });

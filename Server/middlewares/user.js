@@ -195,7 +195,7 @@ router.put('/removeFavLoc', authenticateUser, async (req, res) => {
     }
 });
 
-// POST http://server-address/api/user/comment
+// PUT http://server-address/api/user/addComment
 router.put('/addComment', authenticateUser, async (req, res) => {
     try {
         const {userId} = req.user;
@@ -217,6 +217,67 @@ router.put('/addComment', authenticateUser, async (req, res) => {
         });
     } catch (error) {
         console.log("Got error while updating comments");
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+})
+
+// GET http://server-address/api/user/likes
+router.get('/likes', authenticateUser, (req, res) => {
+    const {userId} = req.user;
+    User.findOne({userId})
+    .then((data) => {
+        res.status(200).send(data.likedEvents);
+    })
+    .catch((err) => {
+        console.error('Error fetching user data:', error);
+        res.status(500).json({ message: 'Server error' });
+    })
+})
+
+// PUT http://server-address/api/user/addLike
+router.put('/addLike', authenticateUser, async (req, res) => {
+    try {
+        const {userId} = req.user;
+        const { eventId } = req.body; 
+        const user = await User.findOne({userId});
+        const updatedUser = await User.findByIdAndUpdate(
+            user,
+            { $addToSet: { likedEvents: eventId } },
+            { new: true }
+        )
+        if(!updatedUser){
+            return res.status(404).json({message: "User not found"});
+        }
+        res.status(200).json({
+            message: 'User likedEvents updated successfully'
+        });
+    } catch (error) {
+        console.log("Got error while updating likedEvents");
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+})
+
+// PUT http://server-address/api/user/removeLike
+router.put('/removeLike', authenticateUser, async (req, res) => {
+    try {
+        const {userId} = req.user;
+        const { eventId } = req.body; 
+        const user = await User.findOne({userId});
+        const updatedUser = await User.findByIdAndUpdate(
+            user,
+            { $pull: { likedEvents: eventId } },
+            { new: true }
+        )
+        if(!updatedUser){
+            return res.status(404).json({message: "User not found"});
+        }
+        res.status(200).json({
+            message: 'User likedEvents updated successfully'
+        });
+    } catch (error) {
+        console.log("Got error while updating likedEvents");
         console.log(error);
         res.status(500).json({ message: error.message });
     }

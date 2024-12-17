@@ -31,6 +31,11 @@ const UserSchema = new Schema({
         type: Number,
         ref: 'Location',
         default: []
+    }],
+    likedEvents: [{
+        type: Number,
+        ref: 'Event',
+        default: []
     }]
 });
 
