@@ -15,6 +15,7 @@ const Login = () => {
         e.preventDefault();
       
         try {
+          setUsername(username.trim());
           console.log(username);
           console.log(password);
           console.log("rememberMe is : ", rememberMe);
