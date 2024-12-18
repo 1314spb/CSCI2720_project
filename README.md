@@ -82,3 +82,6 @@ cd ../client
 npm run dev
 ```
 3. You can now browse the application in http://localhost:5173/
+
+## Remark
+1. We should NOT push the .env to GitHub, but it is just for convinence of our project.
