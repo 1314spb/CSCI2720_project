@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
-import { PencilIcon } from "@heroicons/react/24/solid";
+import { XMarkIcon, CheckIcon } from '@heroicons/react/24/solid';
 import {
   Card,
   Typography,
@@ -231,7 +231,7 @@ const ListOfLocation = () => {
                   className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-neutral-400"
                 />
                 {isSliding && (
-                  <div 
+                  <div
                     className="absolute top-[-30px] left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-sm rounded px-2 py-1"
                     style={{ left: `calc(${(maxDistance / 50) * 100}% - 20px)` }}
                   >
@@ -311,15 +311,19 @@ const ListOfLocation = () => {
                           </td>
                           <td className={classes}>
                             <Tooltip content={isFavorite ? "Remove from Favourite" : "Add to Favourite"}>
-                              <IconButton 
+                              <IconButton
                                 onClick={(e) => {
                                   e.preventDefault();
                                   changeFavority(id, isFavorite);
-                                }} 
+                                }}
                                 variant="text"
-                                className={`rounded-lg p-2 transition-colors duration-200 ${isFavorite ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white'}`}
+                                className={`flex items-center justify-center rounded-lg p-2 transition-colors duration-200 ${isFavorite ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 border border-blue-500 hover:bg-blue-500 hover:text-white'}`}
                               >
-                                <PencilIcon className="h-4 w-4" />
+                                {isFavorite ? (
+                                  <XMarkIcon className="h-4 w-4" />
+                                ) : (
+                                  <CheckIcon className="h-4 w-4" />
+                                )}
                               </IconButton>
                             </Tooltip>
                           </td>

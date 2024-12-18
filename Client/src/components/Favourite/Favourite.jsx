@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
   ChevronUpDownIcon,
 } from "@heroicons/react/24/outline";
-import { PencilIcon } from "@heroicons/react/24/solid";
+import { XMarkIcon } from '@heroicons/react/24/solid';
 import {
   Card,
   Typography,
@@ -125,7 +125,7 @@ const SortableTable = () => {
   return (
     <Card className="h-full w-full">
       <CardBody className="overflow-scroll px-0">
-        <div className="mb-4">
+        <div className="m-4">
           <Input
             type="text"
             placeholder="Search by location"
@@ -190,8 +190,9 @@ const SortableTable = () => {
                             onClick={(e)=>{
                               e.preventDefault();
                               removeFavLoc(locId)
-                            }}>
-                          <PencilIcon className="h-4 w-4" />
+                            }}
+                            className='flex items-center justify-between'>
+                          <XMarkIcon className="h-4 w-4" />
                         </IconButton>
                       </Tooltip>
                     </td>
