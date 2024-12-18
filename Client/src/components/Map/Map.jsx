@@ -19,6 +19,20 @@ const Map = () => {
     const [comments, setComments] = useState({});
     const [selectedVenue, setSelectedVenue] = useState(null);
 
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { longitude, latitude } = position.coords;
+                setUserLocation({ lng: longitude, lat: latitude });
+            },
+            (error) => {
+                console.error("Get user location error: ", error);
+                setUserLocation({ lng: 114.206, lat: 22.42 });
+            }
+        );
+    }, []);
+
+
     const fetchVenues = async () => {
         console.log("fetchVenues called");
         try {
@@ -37,8 +51,8 @@ const Map = () => {
             console.log("locationResponse is: ", locationsResponse.data);
             // Combine locations with favorite status
             const locationsWithFavorites = locationsResponse.data.map((location) => ({
-              ...location,
-              isFavorite: userFavorites.includes(location.locId), // Determine favorite status
+                ...location,
+                isFavorite: userFavorites.includes(location.locId), // Determine favorite status
             }));
 
             const venueList = locationsWithFavorites.map((venue) => ({
@@ -55,7 +69,7 @@ const Map = () => {
                 if (!acc[locId]) {
                     acc[locId] = [];
                 }
-                
+
                 // Extract comments and push them to the corresponding locId
                 comments.forEach(({ comment }) => {
                     acc[locId].push(comment);
@@ -66,7 +80,7 @@ const Map = () => {
             console.log('Updated venues:', venueList);
             setVenues(venueList);
             setComments(comments);
-            
+
         } catch (error) {
             console.error('Error fetching locations or user favorites:', error);
         }
@@ -80,44 +94,44 @@ const Map = () => {
         console.log(`Changing favorite status for locId: ${locId}, isFavorite: ${isFavorite}`);
         try {
 
-          if (isFavorite) {
-            await apiCsrf.put(
-              '/api/user/removeFavLoc',
-              { favoriteLocationIds: locId },
-              {
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                withCredentials: true
-              }
+            if (isFavorite) {
+                await apiCsrf.put(
+                    '/api/user/removeFavLoc',
+                    { favoriteLocationIds: locId },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        withCredentials: true
+                    }
+                );
+            } else {
+                await apiCsrf.put(
+                    '/api/user/addFavLoc',
+                    { favoriteLocationIds: locId },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        withCredentials: true
+                    }
+                );
+            }
+
+            setVenues((prevVenues) =>
+                prevVenues.map((venue) =>
+                    venue.id === locId
+                        ? { ...venue, isFavorite: !isFavorite }
+                        : venue
+                )
             );
-          } else {
-            await apiCsrf.put(
-              '/api/user/addFavLoc',
-              { favoriteLocationIds: locId },
-              {
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                withCredentials: true
-              }
-            );
-          }
-    
-        setVenues((prevVenues) =>
-            prevVenues.map((venue) =>
-              venue.id === locId
-                  ? { ...venue, isFavorite: !isFavorite }
-                  : venue
-          )
-        );
-        await fetchVenues();
-        console.log('Favorite status toggled successfully and venues reloaded.');
-        
+            await fetchVenues();
+            console.log('Favorite status toggled successfully and venues reloaded.');
+
         } catch (error) {
-          console.error('Error toggling favorite status:', error);
+            console.error('Error toggling favorite status:', error);
         }
-      };
+    };
 
     useEffect(() => {
         if (mapInstanceRef.current) return;
@@ -196,7 +210,7 @@ const Map = () => {
             if (updatedVenue) {
                 setSelectedVenue(updatedVenue);
             }
-            }       
+        }
         // console.log("selectedVenues is: ", selectedVenue);
     }, [venues, location.search]);
 
@@ -215,7 +229,7 @@ const Map = () => {
                     },
                     {
                         headers: {
-                        'Content-Type': 'application/json',
+                            'Content-Type': 'application/json',
                         },
                         withCredentials: true
                     }
@@ -282,7 +296,8 @@ const Map = () => {
                     <button
                         onClick={(e) => {
                             e.preventDefault();
-                            changeFavority(selectedVenue.id, selectedVenue.isFavorite);}}
+                            changeFavority(selectedVenue.id, selectedVenue.isFavorite);
+                        }}
                         className={`mt-4 px-4 py-2 rounded transition-colors flex ${selectedVenue.isFavorite
                             ? ('bg-red-500 hover:bg-red-600')
                             : ('bg-yellow-500 hover:bg-yellow-600')
