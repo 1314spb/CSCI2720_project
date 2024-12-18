@@ -9,6 +9,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const authenticateUser = require('./authCheck');
 
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
+
 router.post('/register', async (req, res) => {
     console.log("Request recieved!");
     try{
@@ -62,9 +64,9 @@ router.post('/login', async (req, res) => {
         }
         const tokenExpiry = rememberMe ? '7d' : '1d' ;
         console.log("tokenExpiry is : ", tokenExpiry);
-        // console.log("process.env.JWT_SECRET_KEY is ", process.env.JWT_SECRET_KEY);
+        
         const token = jwt.sign({ userId: user.userId, username: user.username}, 
-            "mySecretKey",
+            SECRET_KEY,
             {expiresIn: tokenExpiry}
         );
 

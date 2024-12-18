@@ -1,6 +1,8 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
+
 const authenticateUser = (req, res, next) => {
     console.log("authenticateUser is running");
     console.log('Cookie: ', req.cookies);
@@ -10,7 +12,7 @@ const authenticateUser = (req, res, next) => {
     }
   
     try {
-      const verified = jwt.verify(token, "mySecretKey");
+      const verified = jwt.verify(token, SECRET_KEY);
       console.log("verified is ", verified);
       req.user = verified; 
       next();
